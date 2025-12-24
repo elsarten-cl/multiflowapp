@@ -2,12 +2,12 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { CreatePostSchema, ToneEnum } from '@/lib/schemas';
+import { CreatePostSchema, ToneEnum, PlatformEnum } from '@/lib/schemas';
 import { generateContentDraft } from '@/ai/flows/generate-content-draft';
 import { generateContentWithTone } from '@/ai/flows/generate-content-with-tone';
 import { getFirebaseAdminApp } from '@/lib/firebase-admin';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
-import { generateContentInSelectedTone, PlatformEnum } from '@/ai/flows/generate-content-in-selected-tone';
+import { generateContentInSelectedTone } from '@/ai/flows/generate-content-in-selected-tone';
 
 export type FormState = {
   message: string;

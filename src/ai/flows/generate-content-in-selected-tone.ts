@@ -9,8 +9,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-
-export const PlatformEnum = z.enum(['facebook', 'instagram', 'wordpress']);
+import { PlatformEnum } from '@/lib/schemas';
 
 const GenerateContentInSelectedToneInputSchema = z.object({
   textInput: z.string().describe('The base text content.'),
