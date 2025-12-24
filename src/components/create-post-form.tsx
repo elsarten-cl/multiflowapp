@@ -157,35 +157,6 @@ export function CreatePostForm() {
     }
   };
 
-  const handleContentAction = (formData: FormData) => {
-    const values = getValues();
-    const unifiedText = [
-      values.ofertaDeValor,
-      values.problemaSolucion,
-      values.historiaContexto,
-      values.conexionTerritorial,
-      values.ctaSugerido
-    ].filter(Boolean).join('\n\n');
-    
-    formData.set('textoBase', unifiedText);
-    contentFormAction(formData);
-  };
-
-  const handlePublishAction = (formData: FormData) => {
-    const values = getValues();
-    const unifiedText = [
-      values.ofertaDeValor,
-      values.problemaSolucion,
-      values.historiaContexto,
-      values.conexionTerritorial,
-      values.ctaSugerido
-    ].filter(Boolean).join('\n\n');
-    
-    formData.set('textoBase', unifiedText);
-    publishFormAction(formData);
-  };
-
-
   return (
     <Form {...form}>
       <form ref={formRef} className="space-y-8">
@@ -527,7 +498,7 @@ export function CreatePostForm() {
                     />
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
-                     <Button type="submit" formAction={handleContentAction} className="w-full" disabled={isContentPending}>
+                     <Button type="submit" formAction={contentFormAction} className="w-full" disabled={isContentPending}>
                         {isContentPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                         Optimizar Texto y Generar Vistas Previas
                     </Button>
@@ -574,7 +545,7 @@ export function CreatePostForm() {
 
           </CardContent>
           <CardFooter>
-            <Button type="submit" size="lg" formAction={handlePublishAction} disabled={isPublishPending}>
+            <Button type="submit" size="lg" formAction={publishFormAction} disabled={isPublishPending}>
               {isPublishPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
               Guardar y Enviar
             </Button>

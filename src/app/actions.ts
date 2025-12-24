@@ -40,22 +40,34 @@ export async function generateDraftAction(prevState: any, formData: FormData) {
 
 // Action to generate final content and previews
 export async function generateContentAndPreviewsAction(prevState: any, formData: FormData) {
-    const textInput = formData.get('textoBase') as string;
     const rawTone = formData.get('tono');
+    const ofertaDeValor = formData.get('ofertaDeValor') as string;
+    const problemaSolucion = formData.get('problemaSolucion') as string;
+    const historiaContexto = formData.get('historiaContexto') as string;
+    const conexionTerritorial = formData.get('conexionTerritorial') as string;
+    const ctaSugerido = formData.get('ctaSugerido') as string;
+
+    const unifiedText = [
+        ofertaDeValor,
+        problemaSolucion,
+        historiaContexto,
+        conexionTerritorial,
+        ctaSugerido
+    ].filter(Boolean).join('\n\n');
 
     const toneResult = ToneEnum.safeParse(rawTone);
 
-    if (!textInput || !toneResult.success) {
-        return { success: false, message: 'El texto base y el tono son requeridos para generar vistas previas.' };
+    if (!unifiedText || !toneResult.success) {
+        return { success: false, message: 'Se requiere contenido y un tono válido para generar vistas previas.' };
     }
 
     try {
         const platforms: z.infer<typeof PlatformEnum>[] = ['facebook', 'instagram'];
         
         const [contentResult, ...previews] = await Promise.all([
-             generateContentWithTone({ textInput, selectedTone: toneResult.data }),
+             generateContentWithTone({ textInput: unifiedText, selectedTone: toneResult.data }),
             ...platforms.map(platform => 
-                generateContentInSelectedTone({ textInput, selectedTone: toneResult.data, platform })
+                generateContentInSelectedTone({ textInput: unifiedText, selectedTone: toneResult.data, platform })
             )
         ]);
 
@@ -125,7 +137,7 @@ export async function publishAction(prevState: FormState, formData: FormData): P
           await docRef.update({ status: 'publicado', updatedAt: Timestamp.now() });
           message = `Publicación "${data.tituloPublicacion}" enviada con éxito.`;
         } else {
-          await docRef.update({ status: 'error', updatedAt: Timestamp.now() });
+          await docref.update({ status: 'error', updatedAt: Timestamp.now() });
           message = `Borrador guardado, pero la publicación falló (Webhook: ${response.status}).`;
         }
       } catch (fetchError) {
