@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useTransition } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useEffect, useTransition, useActionState } from 'react';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useFormState } from 'react-dom';
 import { CalendarIcon, Loader2, Sparkles, Send } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -15,7 +14,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ImageUploader } from '@/components/image-uploader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -45,7 +43,7 @@ export function CreatePostForm() {
     },
   });
 
-  const [publishState, publishFormAction] = useFormState(publishAction, initialFormState);
+  const [publishState, publishFormAction] = useActionState(publishAction, initialFormState);
 
   useEffect(() => {
     if (publishState.message) {
@@ -298,8 +296,8 @@ export function CreatePostForm() {
             )}
           </CardContent>
           <CardFooter>
-            <Button type="submit" size="lg" aria-disabled={publishState.success}>
-              <Send className="mr-2 h-4 w-4" />
+            <Button type="submit" size="lg" disabled={publishState.pending}>
+              {publishState.pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
               Guardar y Enviar
             </Button>
           </CardFooter>
