@@ -19,18 +19,18 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 
 const initialFormState = { message: '', errors: {}, success: false, pending: false };
 
+const autoResizeTextarea = (element: HTMLTextAreaElement | null) => {
+    if (element) {
+        element.style.height = 'auto';
+        element.style.height = `${element.scrollHeight}px`;
+    }
+};
+
 export function CreatePostForm() {
   const { toast } = useToast();
   const [isDraftPending, startDraftTransition] = useTransition();
   const [isContentPending, startContentTransition] = useTransition();
   
-  const ofertaDeValorRef = useRef<HTMLTextAreaElement>(null);
-  const problemaSolucionRef = useRef<HTMLTextAreaElement>(null);
-  const historiaContextoRef = useRef<HTMLTextAreaElement>(null);
-  const conexionTerritorialRef = useRef<HTMLTextAreaElement>(null);
-  const textoBaseRef = useRef<HTMLTextAreaElement>(null);
-
-
   const form = useForm<CreatePostInput>({
     resolver: zodResolver(CreatePostSchema),
     defaultValues: {
@@ -55,7 +55,6 @@ export function CreatePostForm() {
   const conexionTerritorial = useWatch({ control, name: 'conexionTerritorial' });
   const ctaSugerido = useWatch({ control, name: 'ctaSugerido' });
   const imageUrl = useWatch({ control, name: 'imageUrl' });
-  const textoBase = useWatch({ control, name: 'textoBase' });
 
   useEffect(() => {
     const unifiedText = [
@@ -68,18 +67,6 @@ export function CreatePostForm() {
     setValue('textoBase', unifiedText, { shouldValidate: true, shouldDirty: true });
   }, [ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, ctaSugerido, setValue]);
 
-  const autoResizeTextarea = (ref: React.RefObject<HTMLTextAreaElement>) => {
-    if (ref.current) {
-        ref.current.style.height = 'auto';
-        ref.current.style.height = `${ref.current.scrollHeight}px`;
-    }
-  };
-
-  useEffect(() => autoResizeTextarea(textoBaseRef), [textoBase]);
-  useEffect(() => autoResizeTextarea(ofertaDeValorRef), [ofertaDeValor]);
-  useEffect(() => autoResizeTextarea(problemaSolucionRef), [problemaSolucion]);
-  useEffect(() => autoResizeTextarea(historiaContextoRef), [historiaContexto]);
-  useEffect(() => autoResizeTextarea(conexionTerritorialRef), [conexionTerritorial]);
 
   const [publishState, publishFormAction] = useActionState(publishAction, initialFormState);
 
@@ -220,7 +207,7 @@ export function CreatePostForm() {
           <CardHeader>
             <CardTitle>2. Contenido Principal</CardTitle>
             <CardDescription>
-              Define los elementos clave de tu publicación. Puedes editarlos manualmente o generarlos con IA.
+              Define los elementos clave de tu publicación. Puedes editarlos manually o generarlos con IA.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -246,11 +233,16 @@ export function CreatePostForm() {
                 <FormItem>
                   <FormLabel>Oferta de valor</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      ref={ofertaDeValorRef} 
-                      placeholder="Describe la oferta de valor principal." 
-                      className="resize-none overflow-hidden" 
-                      {...field} />
+                    <Textarea
+                      placeholder="Describe la oferta de valor principal."
+                      className="resize-none overflow-hidden"
+                      {...field}
+                      onInput={(e) => autoResizeTextarea(e.currentTarget)}
+                      ref={(e) => {
+                        field.ref(e);
+                        autoResizeTextarea(e);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -264,11 +256,16 @@ export function CreatePostForm() {
                 <FormItem>
                   <FormLabel>Problema / solución</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      ref={problemaSolucionRef} 
-                      placeholder="Explica el problema que resuelves y cómo." 
-                      className="resize-none overflow-hidden" 
-                      {...field} />
+                    <Textarea
+                      placeholder="Explica el problema que resuelves y cómo."
+                      className="resize-none overflow-hidden"
+                      {...field}
+                      onInput={(e) => autoResizeTextarea(e.currentTarget)}
+                       ref={(e) => {
+                        field.ref(e);
+                        autoResizeTextarea(e);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -282,11 +279,16 @@ export function CreatePostForm() {
                 <FormItem>
                   <FormLabel>Historia / contexto</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      ref={historiaContextoRef} 
-                      placeholder="Aporta contexto o una historia relevante." 
-                      className="resize-none overflow-hidden" 
-                      {...field} />
+                    <Textarea
+                      placeholder="Aporta contexto o una historia relevante."
+                      className="resize-none overflow-hidden"
+                      {...field}
+                      onInput={(e) => autoResizeTextarea(e.currentTarget)}
+                       ref={(e) => {
+                        field.ref(e);
+                        autoResizeTextarea(e);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -300,11 +302,16 @@ export function CreatePostForm() {
                 <FormItem>
                   <FormLabel>Conexión territorial</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      ref={conexionTerritorialRef} 
-                      placeholder="Crea una conexión con la audiencia local o territorial." 
-                      className="resize-none overflow-hidden" 
-                      {...field} />
+                    <Textarea
+                      placeholder="Crea una conexión con la audiencia local o territorial."
+                      className="resize-none overflow-hidden"
+                      {...field}
+                      onInput={(e) => autoResizeTextarea(e.currentTarget)}
+                       ref={(e) => {
+                        field.ref(e);
+                        autoResizeTextarea(e);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -370,11 +377,14 @@ export function CreatePostForm() {
                     render={({ field }) => (
                         <FormItem>
                         <FormControl>
-                            <Textarea 
-                                ref={textoBaseRef}
-                                readOnly 
+                            <Textarea
                                 className="resize-none bg-background overflow-hidden" 
-                                {...field} 
+                                {...field}
+                                onInput={(e) => autoResizeTextarea(e.currentTarget)}
+                                ref={(e) => {
+                                    field.ref(e);
+                                    autoResizeTextarea(e);
+                                }}
                             />
                         </FormControl>
                         <FormMessage />
