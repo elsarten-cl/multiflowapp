@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "feature1",
+      "description": "An image representing the idea generation and drafting process.",
+      "imageUrl": "https://images.unsplash.com/photo-1645821522718-5326f3fe6c8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3cml0aW5nJTIwaWRlYXxlbnwwfHx8fDE3NjY1ODQyNzl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "writing idea"
+    },
+    {
+      "id": "feature2",
+      "description": "An image showing content being generated or optimized for different platforms.",
+      "imageUrl": "https://images.unsplash.com/photo-1573152143286-0c422b4d2175?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzb2NpYWwlMjBtZWRpYXxlbnwwfHx8fDE3NjY1NTk4NTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "social media"
+    },
+    {
+      "id": "feature3",
+      "description": "An image depicting content being published or scheduled across multiple channels.",
+      "imageUrl": "https://images.unsplash.com/photo-1653213096326-4e3854c6fcc2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzY2hlZHVsaW5nJTIwcHVibGlzaGluZ3xlbnwwfHx8fDE3NjY1ODQyNzl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "scheduling publishing"
+    },
+    {
+      "id": "avatar1",
+      "description": "A user avatar.",
+      "imageUrl": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjY1MDkwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    }
+  ]
 }
