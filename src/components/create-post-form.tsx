@@ -247,7 +247,7 @@ export function CreatePostForm() {
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un tipo" />
-                      </Trigger>
+                      </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="articulo">Artículo / Contenido</SelectItem>
