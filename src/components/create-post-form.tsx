@@ -305,7 +305,7 @@ export function CreatePostForm() {
                             <FormItem>
                                 <FormLabel>Precio</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Ej: 29.99" {...field} />
+                                    <Input placeholder="Ej: $24.990" {...field} />
                                 </FormControl>
                                 <FormMessage>{publishState.errors?.precio?.[0] || formState.errors.precio?.message}</FormMessage>
                             </FormItem>
