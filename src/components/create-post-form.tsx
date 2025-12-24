@@ -3,7 +3,7 @@
 import { useEffect, useTransition, useActionState, useRef, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Sparkles, Send, Upload, Facebook, Instagram, Wordpress } from 'lucide-react';
+import { Loader2, Sparkles, Send, Upload, Facebook, Instagram, Globe } from 'lucide-react';
 import Image from 'next/image';
 
 import { CreatePostSchema, TONES, type CreatePostInput } from '@/lib/schemas';
@@ -86,8 +86,10 @@ export function CreatePostForm() {
   }, [ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, ctaSugerido, setValue, getValues]);
 
   useEffect(() => {
-    requestAnimationFrame(() => autoResizeTextarea(textoBaseRef.current));
-  }, [textoBaseValue]);
+    requestAnimationFrame(() => {
+      allRefs.forEach(ref => autoResizeTextarea(ref.current));
+    });
+  }, [textoBaseValue, ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial]);
 
 
   const [publishState, publishFormAction] = useActionState(publishAction, initialFormState);
@@ -523,7 +525,7 @@ export function CreatePostForm() {
                     <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="facebook"><Facebook className="mr-2"/>Facebook</TabsTrigger>
                       <TabsTrigger value="instagram"><Instagram className="mr-2"/>Instagram</TabsTrigger>
-                      <TabsTrigger value="wordpress"><Wordpress className="mr-2"/>WordPress</TabsTrigger>
+                      <TabsTrigger value="wordpress"><Globe className="mr-2"/>WordPress</TabsTrigger>
                     </TabsList>
                     <div className="mt-4 p-4 border rounded-md min-h-[200px] bg-background">
                         {isPreviewPending ? (
