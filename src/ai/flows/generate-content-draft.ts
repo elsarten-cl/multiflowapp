@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { PostTypeEnum } from '@/lib/schemas';
 
 const ToneEnum = z.enum([
   'Persuasivo',
@@ -26,6 +27,7 @@ const GenerateContentDraftInputSchema = z.object({
     .string()
     .describe('The main idea for which to generate a content draft.'),
   selectedTone: ToneEnum.describe('The tone of voice to use for the content draft.'),
+  postType: PostTypeEnum.describe('The type of the post, either article or product.'),
 });
 export type GenerateContentDraftInput = z.infer<typeof GenerateContentDraftInputSchema>;
 
@@ -48,12 +50,15 @@ const prompt = ai.definePrompt({
   name: 'generateContentDraftPrompt',
   input: {schema: GenerateContentDraftInputSchema},
   output: {schema: GenerateContentDraftOutputSchema},
-  prompt: `You are a content creation assistant. Your task is to generate a structured draft based on the given idea and the selected tone.
+  prompt: `You are a content creation assistant. Your task is to generate a structured draft based on the given idea, selected tone, and post type.
 
 Idea: {{{idea}}}
 Tone: {{{selectedTone}}}
+Post Type: {{{postType}}}
 
-The draft should include the following sections: "Oferta de valor", "Problema / solución", "Historia / contexto", "Conexión territorial", and "CTA sugerido". The output MUST be a string formatted exactly like this, with each field on a new line:
+The draft should include the following sections: "Oferta de valor", "Problema / solución", "Historia / contexto", "Conexión territorial", and "CTA sugerido". 
+If the Post Type is 'producto', make sure the content is oriented towards selling a product.
+The output MUST be a string formatted exactly like this, with each field on a new line:
 Oferta de valor: [content]
 Problema / solución: [content]
 Historia / contexto: [content]
@@ -73,7 +78,3 @@ const generateContentDraftFlow = ai.defineFlow(
     return output!;
   }
 );
-
-    
-
-    

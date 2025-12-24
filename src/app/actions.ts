@@ -21,15 +21,17 @@ export type FormState = {
 export async function generateDraftAction(prevState: FormState, formData: FormData): Promise<FormState> {
   const idea = formData.get('idea') as string;
   const rawTone = formData.get('tono');
+  const postType = formData.get('postType') as z.infer<typeof ToneEnum>;
 
   const toneResult = ToneEnum.safeParse(rawTone);
+  const postTypeResult = z.enum(['articulo', 'producto']).safeParse(postType);
 
-  if (!idea || !toneResult.success) {
-    return { success: false, message: "La idea y un tono válido son requeridos para generar un borrador." };
+  if (!idea || !toneResult.success || !postTypeResult.success) {
+    return { success: false, message: "La idea, un tono válido y el tipo de publicación son requeridos para generar un borrador." };
   }
 
   try {
-    const result = await generateContentDraft({ idea, selectedTone: toneResult.data });
+    const result = await generateContentDraft({ idea, selectedTone: toneResult.data, postType: postTypeResult.data });
     return { success: true, message: "Borrador generado.", data: result };
   } catch (e) {
     console.error(e);

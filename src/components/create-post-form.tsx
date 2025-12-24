@@ -74,8 +74,9 @@ export function CreatePostForm() {
   const problemaSolucionRef = useRef<HTMLTextAreaElement>(null);
   const historiaContextoRef = useRef<HTMLTextAreaElement>(null);
   const conexionTerritorialRef = useRef<HTMLTextAreaElement>(null);
+  const descripcionProductoRef = useRef<HTMLTextAreaElement>(null);
   
-  const allRefs = [ofertaDeValorRef, problemaSolucionRef, historiaContextoRef, conexionTerritorialRef, textoBaseRef];
+  const allRefs = [ofertaDeValorRef, problemaSolucionRef, historiaContextoRef, conexionTerritorialRef, textoBaseRef, descripcionProductoRef];
 
   useEffect(() => {
     const unifiedText = [
@@ -94,7 +95,7 @@ export function CreatePostForm() {
     requestAnimationFrame(() => {
       allRefs.forEach(ref => autoResizeTextarea(ref.current));
     });
-  }, [textoBaseValue, ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial]);
+  }, [textoBaseValue, ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, form.watch('descripcionProducto')]);
 
 
   const [publishState, publishFormAction] = useActionState(publishAction, initialFormState);
@@ -130,6 +131,8 @@ export function CreatePostForm() {
       const formData = new FormData();
       formData.append('idea', form.getValues('idea') || '');
       formData.append('tono', form.getValues('tono'));
+      formData.append('postType', form.getValues('postType'));
+      
       const result = await generateDraftAction(initialFormState, formData);
       if (result.success && result.data?.draft) {
         const draft = result.data.draft;
@@ -162,34 +165,36 @@ export function CreatePostForm() {
     });
   };
 
-  const handleGenerateContent = () => {
+  const handleGenerateContentAndPreviews = () => {
     startContentTransition(async () => {
       const formData = new FormData();
       formData.append('textoBase', form.getValues('textoBase'));
       formData.append('tono', form.getValues('tono'));
-      const result = await generateContentAction(initialFormState, formData);
-      if (result.success && result.data?.content) {
-        setValue('textoBase', result.data.content, { shouldValidate: true, shouldDirty: true });
+
+      // Run both actions
+      const contentPromise = generateContentAction(initialFormState, formData);
+      const previewPromise = generatePreviewAction(initialFormState, formData);
+      
+      const [contentResult, previewResult] = await Promise.all([contentPromise, previewPromise]);
+
+      let hasError = false;
+
+      if (contentResult.success && contentResult.data?.content) {
+        setValue('textoBase', contentResult.data.content, { shouldValidate: true, shouldDirty: true });
         toast({ title: 'Contenido optimizado', description: 'El texto unificado ha sido actualizado.' });
       } else {
-        toast({ title: 'Error', description: result.message, variant: 'destructive' });
+        hasError = true;
+        toast({ title: 'Error de Contenido', description: contentResult.message, variant: 'destructive' });
+      }
+
+      if (previewResult.success && previewResult.data) {
+        setPreviews(previewResult.data);
+        toast({ title: 'Vistas previas generadas', description: 'Se generó el contenido para cada plataforma.' });
+      } else {
+        hasError = true;
+        toast({ title: 'Error de Vistas Previas', description: previewResult.message, variant: 'destructive' });
       }
     });
-  };
-  
-  const handleGeneratePreviews = () => {
-      startPreviewTransition(async () => {
-          const formData = new FormData();
-          formData.append('textoBase', form.getValues('textoBase'));
-          formData.append('tono', form.getValues('tono'));
-          const result = await generatePreviewAction(initialFormState, formData);
-          if (result.success && result.data) {
-              setPreviews(result.data);
-              toast({ title: 'Vistas previas generadas', description: 'Se generó el contenido para cada plataforma.' });
-          } else {
-              toast({ title: 'Error', description: result.message, variant: 'destructive' });
-          }
-      });
   };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -317,7 +322,7 @@ export function CreatePostForm() {
                     <Input placeholder="Ej: Campaña Verano 2024 - Post 1" {...field} />
                   </FormControl>
                   <FormDescription>Un nombre para identificar esta publicación internamente.</FormDescription>
-                  <FormMessage>{formState.errors.tituloInterno?.message}</FormMessage>
+                  <FormMessage>{publishState.errors?.tituloInterno?.[0] || formState.errors.tituloInterno?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -333,7 +338,7 @@ export function CreatePostForm() {
                                 <FormControl>
                                     <Input placeholder="Ej: Crema Hidratante Pro" {...field} />
                                 </FormControl>
-                                <FormMessage>{formState.errors.nombreProducto?.message}</FormMessage>
+                                <FormMessage>{publishState.errors?.nombreProducto?.[0] || formState.errors.nombreProducto?.message}</FormMessage>
                             </FormItem>
                         )}
                     />
@@ -346,7 +351,7 @@ export function CreatePostForm() {
                                 <FormControl>
                                     <Input placeholder="Ej: 29.99" {...field} />
                                 </FormControl>
-                                <FormMessage>{formState.errors.precio?.message}</FormMessage>
+                                <FormMessage>{publishState.errors?.precio?.[0] || formState.errors.precio?.message}</FormMessage>
                             </FormItem>
                         )}
                     />
@@ -365,9 +370,13 @@ export function CreatePostForm() {
                                             field.onChange(e);
                                             autoResizeTextarea(e.currentTarget);
                                         }}
+                                        ref={(e) => {
+                                            field.ref(e);
+                                            descripcionProductoRef.current = e;
+                                        }}
                                     />
                                 </FormControl>
-                                <FormMessage>{formState.errors.descripcionProducto?.message}</FormMessage>
+                                <FormMessage>{publishState.errors?.descripcionProducto?.[0] || formState.errors.descripcionProducto?.message}</FormMessage>
                             </FormItem>
                         )}
                     />
@@ -395,7 +404,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{formState.errors.ofertaDeValor?.message}</FormMessage>
+                  <FormMessage>{publishState.errors?.ofertaDeValor?.[0] || formState.errors.ofertaDeValor?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -421,7 +430,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{formState.errors.problemaSolucion?.message}</FormMessage>
+                  <FormMessage>{publishState.errors?.problemaSolucion?.[0] || formState.errors.problemaSolucion?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -447,7 +456,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{formState.errors.historiaContexto?.message}</FormMessage>
+                  <FormMessage>{publishState.errors?.historiaContexto?.[0] || formState.errors.historiaContexto?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -473,7 +482,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{formState.errors.conexionTerritorial?.message}</FormMessage>
+                  <FormMessage>{publishState.errors?.conexionTerritorial?.[0] || formState.errors.conexionTerritorial?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -487,7 +496,7 @@ export function CreatePostForm() {
                   <FormControl>
                     <Input placeholder="Ej: ¡Compra ahora!, Más información aquí" {...field} />
                   </FormControl>
-                  <FormMessage>{formState.errors.ctaSugerido?.message}</FormMessage>
+                  <FormMessage>{publishState.errors?.ctaSugerido?.[0] || formState.errors.ctaSugerido?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -550,24 +559,20 @@ export function CreatePostForm() {
                                 }}
                             />
                         </FormControl>
-                        <FormMessage>{formState.errors.textoBase?.message}</FormMessage>
+                        <FormMessage>{publishState.errors?.textoBase?.[0] || formState.errors.textoBase?.message}</FormMessage>
                         </FormItem>
                     )}
                     />
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
-                     <Button type="button" variant="outline" className="w-full" onClick={handleGenerateContent} disabled={isContentPending}>
+                     <Button type="button" variant="outline" className="w-full" onClick={handleGenerateContentAndPreviews} disabled={isContentPending}>
                         {isContentPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                        Optimizar Texto con IA
-                    </Button>
-                    <Button type="button" variant="outline" className="w-full" onClick={handleGeneratePreviews} disabled={isPreviewPending}>
-                        {isPreviewPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                        Generar Vistas Previas
+                        Optimizar Texto y Generar Vistas Previas
                     </Button>
                 </CardFooter>
             </Card>
 
-            {(previews.facebook || previews.instagram || previews.wordpress || isPreviewPending) && (
+            {(previews.facebook || previews.instagram || previews.wordpress || isContentPending) && (
               <Card>
                 <CardHeader>
                   <CardTitle>3. Vistas Previas</CardTitle>
@@ -583,7 +588,7 @@ export function CreatePostForm() {
                       <TabsTrigger value="wordpress"><Globe className="mr-2"/>WordPress</TabsTrigger>
                     </TabsList>
                     <div className="mt-4 p-4 border rounded-md min-h-[200px] bg-background">
-                        {isPreviewPending ? (
+                        {isContentPending ? (
                             <div className="space-y-2">
                                 <Skeleton className="h-4 w-[250px]" />
                                 <Skeleton className="h-4 w-[200px]" />
