@@ -218,7 +218,7 @@ export function CreatePostForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tono de Voz</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un tono" />
@@ -240,7 +240,7 @@ export function CreatePostForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo de Publicación</FormLabel>
-                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un tipo" />
