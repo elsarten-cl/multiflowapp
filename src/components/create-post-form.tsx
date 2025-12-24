@@ -333,7 +333,12 @@ export function CreatePostForm() {
                     render={({ field }) => (
                         <FormItem>
                         <FormControl>
-                            <Textarea readOnly className="min-h-[200px] bg-background" {...field} />
+                            <Textarea readOnly className="resize-none bg-background overflow-y-hidden" {...field} style={{height: 'auto'}}
+                            onInput={(e) => {
+                                const target = e.target as HTMLTextAreaElement;
+                                target.style.height = 'auto';
+                                target.style.height = `${target.scrollHeight}px`;
+                            }} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
