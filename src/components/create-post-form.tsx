@@ -58,7 +58,7 @@ export function CreatePostForm() {
     context: publishState, 
   });
 
-  const { control, setValue, getValues } = form;
+  const { control, setValue, getValues, formState: { errors } } = form;
 
   const imageUrl = useWatch({ control, name: 'imageUrl' });
   const postType = useWatch({ control, name: 'postType' });
@@ -247,7 +247,7 @@ export function CreatePostForm() {
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un tipo" />
-                      </SelectTrigger>
+                      </Trigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="articulo">Artículo / Contenido</SelectItem>
@@ -271,7 +271,7 @@ export function CreatePostForm() {
                                 <FormControl>
                                     <Input placeholder="Ej: Crema Hidratante Pro" {...field} />
                                 </FormControl>
-                                <FormMessage>{form.formState.errors.nombreProducto?.message}</FormMessage>
+                                <FormMessage>{errors.nombreProducto?.message}</FormMessage>
                             </FormItem>
                         )}
                     />
@@ -284,7 +284,7 @@ export function CreatePostForm() {
                                 <FormControl>
                                     <Input placeholder="Ej: $24.990" {...field} />
                                 </FormControl>
-                                <FormMessage>{form.formState.errors.precio?.message}</FormMessage>
+                                <FormMessage>{errors.precio?.message}</FormMessage>
                             </FormItem>
                         )}
                     />
@@ -317,7 +317,7 @@ export function CreatePostForm() {
             )}
           </CardContent>
           <CardFooter>
-            <Button formAction={draftFormAction} disabled={isDraftPending}>
+            <Button type="submit" formAction={draftFormAction} disabled={isDraftPending}>
               {isDraftPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Generar Borrador
             </Button>
@@ -342,7 +342,7 @@ export function CreatePostForm() {
                     <Input placeholder="Ej: Nueva Crema Hidratante para una Piel Radiante" {...field} />
                   </FormControl>
                   <FormDescription>Un título atractivo para tu publicación.</FormDescription>
-                  <FormMessage>{form.formState.errors.tituloPublicacion?.message}</FormMessage>
+                  <FormMessage>{errors.tituloPublicacion?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -368,7 +368,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{form.formState.errors.ofertaDeValor?.message}</FormMessage>
+                  <FormMessage>{errors.ofertaDeValor?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -394,7 +394,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{form.formState.errors.problemaSolucion?.message}</FormMessage>
+                  <FormMessage>{errors.problemaSolucion?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -523,13 +523,13 @@ export function CreatePostForm() {
                                 }}
                             />
                         </FormControl>
-                        <FormMessage>{form.formState.errors.textoBase?.message}</FormMessage>
+                        <FormMessage>{errors.textoBase?.message}</FormMessage>
                         </FormItem>
                     )}
                     />
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
-                     <Button formAction={handleContentAction} className="w-full" disabled={isContentPending}>
+                     <Button type="submit" formAction={handleContentAction} className="w-full" disabled={isContentPending}>
                         {isContentPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                         Optimizar Texto y Generar Vistas Previas
                     </Button>
