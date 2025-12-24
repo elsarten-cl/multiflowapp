@@ -23,6 +23,7 @@ export function CreatePostForm() {
   const { toast } = useToast();
   const [isDraftPending, startDraftTransition] = useTransition();
   const [isContentPending, startContentTransition] = useTransition();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const form = useForm<CreatePostInput>({
     resolver: zodResolver(CreatePostSchema),
@@ -48,6 +49,7 @@ export function CreatePostForm() {
   const conexionTerritorial = useWatch({ control, name: 'conexionTerritorial' });
   const ctaSugerido = useWatch({ control, name: 'ctaSugerido' });
   const imageUrl = useWatch({ control, name: 'imageUrl' });
+  const textoBase = useWatch({ control, name: 'textoBase' });
 
   useEffect(() => {
     const unifiedText = [
@@ -59,6 +61,13 @@ export function CreatePostForm() {
     ].filter(Boolean).join('\n\n');
     setValue('textoBase', unifiedText, { shouldValidate: true, shouldDirty: true });
   }, [ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, ctaSugerido, setValue]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [textoBase]);
 
   const [publishState, publishFormAction] = useActionState(publishAction, initialFormState);
 
@@ -333,12 +342,12 @@ export function CreatePostForm() {
                     render={({ field }) => (
                         <FormItem>
                         <FormControl>
-                            <Textarea readOnly className="resize-none bg-background overflow-y-hidden" {...field} style={{height: 'auto'}}
-                            onInput={(e) => {
-                                const target = e.target as HTMLTextAreaElement;
-                                target.style.height = 'auto';
-                                target.style.height = `${target.scrollHeight}px`;
-                            }} />
+                            <Textarea 
+                                ref={textareaRef}
+                                readOnly 
+                                className="resize-none bg-background overflow-hidden" 
+                                {...field} 
+                            />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -365,5 +374,3 @@ export function CreatePostForm() {
     </Form>
   );
 }
-
-    
