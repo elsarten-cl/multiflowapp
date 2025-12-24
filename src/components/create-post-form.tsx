@@ -317,7 +317,7 @@ export function CreatePostForm() {
             )}
           </CardContent>
           <CardFooter>
-            <Button type="button" formAction={draftFormAction} disabled={isDraftPending}>
+            <Button formAction={draftFormAction} disabled={isDraftPending}>
               {isDraftPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Generar Borrador
             </Button>
@@ -529,7 +529,7 @@ export function CreatePostForm() {
                     />
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
-                     <Button type="button" formAction={handleContentAction} className="w-full" disabled={isContentPending}>
+                     <Button formAction={handleContentAction} className="w-full" disabled={isContentPending}>
                         {isContentPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                         Optimizar Texto y Generar Vistas Previas
                     </Button>
