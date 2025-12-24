@@ -74,30 +74,6 @@ export function CreatePostForm() {
   const allRefs = [ofertaDeValorRef, problemaSolucionRef, historiaContextoRef, conexionTerritorialRef, textoBaseRef, descripcionProductoRef];
   const formRef = useRef<HTMLFormElement>(null);
   
-  // This useEffect was causing the infinite loop.
-  // It's better to compose the text right before the action call.
-  // useEffect(() => {
-  //   const unifiedText = [
-  //     ofertaDeValor,
-  //     problemaSolucion,
-  //     historiaContexto,
-  //     conexionTerritorial,
-  //     ctaSugerido
-  //   ].filter(Boolean).join('\n\n');
-  //   if (getValues('textoBase') !== unifiedText) {
-  //       setValue('textoBase', unifiedText, { shouldValidate: true, shouldDirty: true });
-  //   }
-  // }, [ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, ctaSugerido, setValue, getValues]);
-
-  // This useEffect was also contributing to the re-render loop.
-  // We can call autoResizeTextarea onInput instead.
-  // useEffect(() => {
-  //   requestAnimationFrame(() => {
-  //     allRefs.forEach(ref => autoResizeTextarea(ref.current));
-  //   });
-  // }, [textoBaseValue, ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, form.watch('descripcionProducto')]);
-
-
   useEffect(() => {
     if (publishState.message) {
       if (publishState.success) {
@@ -183,7 +159,7 @@ export function CreatePostForm() {
     }
   };
 
-  const handleContentAction = () => {
+  const handleContentAction = (formData: FormData) => {
     const values = getValues();
     const unifiedText = [
       values.ofertaDeValor,
@@ -193,19 +169,8 @@ export function CreatePostForm() {
       values.ctaSugerido
     ].filter(Boolean).join('\n\n');
     
-    // Set the unified text into textoBase before submitting
-    setValue('textoBase', unifiedText, { shouldValidate: true, shouldDirty: true });
-
-    // Manually create FormData and trigger the action
-    if (formRef.current) {
-      // We must update the textarea value manually before creating FormData
-      const textoBaseTextarea = formRef.current.querySelector('textarea[name="textoBase"]') as HTMLTextAreaElement;
-      if (textoBaseTextarea) {
-        textoBaseTextarea.value = unifiedText;
-      }
-      const formData = new FormData(formRef.current);
-      contentFormAction(formData);
-    }
+    formData.set('textoBase', unifiedText);
+    contentFormAction(formData);
   };
 
   const handlePublishAction = (formData: FormData) => {
@@ -225,7 +190,7 @@ export function CreatePostForm() {
 
   return (
     <Form {...form}>
-      <form ref={formRef} action={handlePublishAction} className="space-y-8">
+      <form ref={formRef} onSubmit={form.handleSubmit(handlePublishAction)} className="space-y-8">
         <Card>
           <CardHeader>
             <CardTitle>1. Generación de Idea</CardTitle>
@@ -352,7 +317,7 @@ export function CreatePostForm() {
             )}
           </CardContent>
           <CardFooter>
-            <Button type="submit" formAction={draftFormAction} disabled={isDraftPending}>
+            <Button type="button" formAction={draftFormAction} disabled={isDraftPending}>
               {isDraftPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Generar Borrador
             </Button>
@@ -564,7 +529,7 @@ export function CreatePostForm() {
                     />
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
-                     <Button type="button" variant="outline" className="w-full" onClick={handleContentAction} disabled={isContentPending}>
+                     <Button type="button" formAction={handleContentAction} className="w-full" disabled={isContentPending}>
                         {isContentPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                         Optimizar Texto y Generar Vistas Previas
                     </Button>
@@ -599,6 +564,7 @@ export function CreatePostForm() {
                                 </TabsContent>
                                 <TabsContent value="instagram">
                                     <p className="whitespace-pre-wrap">{previews.instagram}</p>
+
                                 </TabsContent>
                             </>
                         )}
@@ -620,5 +586,3 @@ export function CreatePostForm() {
     </Form>
   );
 }
-
-    
