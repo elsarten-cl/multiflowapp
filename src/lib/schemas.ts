@@ -16,16 +16,17 @@ export const CreatePostSchema = z.object({
   idea: z.string().optional(),
   tono: ToneEnum,
   tituloInterno: z.string().min(1, 'El título interno es requerido.'),
-  titular: z.string().min(1, 'El titular es requerido.'),
-  cuerpo: z.string().min(1, 'El cuerpo es requerido.'),
-  cta: z.string().optional(),
+  ofertaDeValor: z.string().min(1, 'La oferta de valor es requerida.'),
+  problemaSolucion: z.string().min(1, 'El campo problema/solución es requerido.'),
+  historiaContexto: z.string().optional(),
+  conexionTerritorial: z.string().optional(),
+  ctaSugerido: z.string().optional(),
   textoBase: z.string().min(1, 'El texto base no puede estar vacío.'),
   imageUrl: z.string().optional().or(z.literal('')),
-  // Deprecated fields from previous version
-  publishMode: z.enum(['ahora', 'programado']).optional().default('ahora'),
-  publishAt: z.coerce.date().optional(),
 });
 
 export type CreatePostInput = z.infer<typeof CreatePostSchema>;
+
+    
 
     

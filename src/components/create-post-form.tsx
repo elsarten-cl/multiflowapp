@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
-const initialFormState = { message: '', errors: {}, success: false };
+const initialFormState = { message: '', errors: {}, success: false, pending: false };
 
 export function CreatePostForm() {
   const { toast } = useToast();
@@ -30,9 +30,11 @@ export function CreatePostForm() {
       idea: '',
       tono: 'Persuasivo',
       tituloInterno: '',
-      titular: '',
-      cuerpo: '',
-      cta: '',
+      ofertaDeValor: '',
+      problemaSolucion: '',
+      historiaContexto: '',
+      conexionTerritorial: '',
+      ctaSugerido: '',
       textoBase: '',
       imageUrl: '',
     },
@@ -40,15 +42,23 @@ export function CreatePostForm() {
 
   const { control, setValue } = form;
 
-  const titular = useWatch({ control, name: 'titular' });
-  const cuerpo = useWatch({ control, name: 'cuerpo' });
-  const cta = useWatch({ control, name: 'cta' });
+  const ofertaDeValor = useWatch({ control, name: 'ofertaDeValor' });
+  const problemaSolucion = useWatch({ control, name: 'problemaSolucion' });
+  const historiaContexto = useWatch({ control, name: 'historiaContexto' });
+  const conexionTerritorial = useWatch({ control, name: 'conexionTerritorial' });
+  const ctaSugerido = useWatch({ control, name: 'ctaSugerido' });
   const imageUrl = useWatch({ control, name: 'imageUrl' });
 
   useEffect(() => {
-    const unifiedText = `${titular || ''}\n\n${cuerpo || ''}\n\n${cta || ''}`.trim();
+    const unifiedText = [
+      ofertaDeValor,
+      problemaSolucion,
+      historiaContexto,
+      conexionTerritorial,
+      ctaSugerido
+    ].filter(Boolean).join('\n\n');
     setValue('textoBase', unifiedText, { shouldValidate: true, shouldDirty: true });
-  }, [titular, cuerpo, cta, setValue]);
+  }, [ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, ctaSugerido, setValue]);
 
   const [publishState, publishFormAction] = useActionState(publishAction, initialFormState);
 
@@ -72,15 +82,25 @@ export function CreatePostForm() {
       formData.append('tono', form.getValues('tono'));
       const result = await generateDraftAction(initialFormState, formData);
       if (result.success && result.data?.draft) {
-        // Simple parsing logic, assuming draft is "Titular: ...\nCuerpo: ...\nCTA: ..."
+        // More robust parsing based on the expected structure
         const draft = result.data.draft;
-        const titularMatch = draft.match(/Titular:(.*)/);
-        const cuerpoMatch = draft.match(/Cuerpo:(.*)/);
-        const ctaMatch = draft.match(/CTA:(.*)/);
-
-        if (titularMatch) setValue('titular', titularMatch[1].trim(), { shouldValidate: true });
-        if (cuerpoMatch) setValue('cuerpo', cuerpoMatch[1].trim(), { shouldValidate: true });
-        if (ctaMatch) setValue('cta', ctaMatch[1].trim(), { shouldValidate: true });
+        const fields = ['Oferta de valor', 'Problema / solución', 'Historia / contexto', 'Conexión territorial', 'CTA sugerido'];
+        const fieldMap: Record<string, keyof CreatePostInput> = {
+          'Oferta de valor': 'ofertaDeValor',
+          'Problema / solución': 'problemaSolucion',
+          'Historia / contexto': 'historiaContexto',
+          'Conexión territorial': 'conexionTerritorial',
+          'CTA sugerido': 'ctaSugerido',
+        };
+  
+        fields.forEach(field => {
+            const regex = new RegExp(`${field}:(.*?)(?=\n[A-Z]|$|\\n\\n)`, 's');
+            const match = draft.match(regex);
+            if (match) {
+                const key = fieldMap[field];
+                setValue(key, match[1].trim(), { shouldValidate: true });
+            }
+        });
         
         toast({ title: 'Borrador generado', description: 'Los campos de contenido han sido actualizados.' });
       } else {
@@ -200,12 +220,12 @@ export function CreatePostForm() {
 
             <FormField
               control={form.control}
-              name="titular"
+              name="ofertaDeValor"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Titular</FormLabel>
+                  <FormLabel>Oferta de valor</FormLabel>
                   <FormControl>
-                    <Input placeholder="El titular principal de tu publicación" {...field} />
+                    <Textarea placeholder="Describe la oferta de valor principal." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -214,12 +234,12 @@ export function CreatePostForm() {
 
             <FormField
               control={form.control}
-              name="cuerpo"
+              name="problemaSolucion"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Cuerpo</FormLabel>
+                  <FormLabel>Problema / solución</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="El contenido principal de tu mensaje." className="min-h-[150px]" {...field} />
+                    <Textarea placeholder="Explica el problema que resuelves y cómo." className="min-h-[150px]" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -228,10 +248,38 @@ export function CreatePostForm() {
 
             <FormField
               control={form.control}
-              name="cta"
+              name="historiaContexto"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Llamada a la Acción (CTA)</FormLabel>
+                  <FormLabel>Historia / contexto</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Aporta contexto o una historia relevante." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="conexionTerritorial"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Conexión territorial</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Crea una conexión con la audiencia local o territorial." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="ctaSugerido"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CTA sugerido</FormLabel>
                   <FormControl>
                     <Input placeholder="Ej: ¡Compra ahora!, Más información aquí" {...field} />
                   </FormControl>
@@ -239,7 +287,7 @@ export function CreatePostForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="imageUrl"
@@ -258,7 +306,7 @@ export function CreatePostForm() {
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                         <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
                                         <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Haz clic para subir</span> o arrastra y suelta</p>
-                                        <p className="text-xs text-muted-foreground">PNG, JPG, GIF (MAX. 800x400px)</p>
+                                        <p className="text-xs text-muted-foreground">PNG, JPG, GIF</p>
                                     </div>
                                 )}
                                 <input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" ref={fileInputRef} />
@@ -273,7 +321,7 @@ export function CreatePostForm() {
 
             <Card className="bg-muted/50">
                 <CardHeader>
-                    <CardTitle className="text-lg">Texto Unificado y Optimización</CardTitle>
+                    <CardTitle className="text-lg">Cuerpo Final</CardTitle>
                     <CardDescription>
                         Este es el texto combinado que se enviará. Puedes optimizarlo con IA antes de guardar.
                     </CardDescription>
@@ -295,7 +343,7 @@ export function CreatePostForm() {
                 <CardFooter>
                      <Button type="button" variant="outline" className="w-full" onClick={handleGenerateContent} disabled={isContentPending}>
                         {isContentPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                        Optimizar Texto Unificado con IA
+                        Optimizar Texto con IA
                     </Button>
                 </CardFooter>
             </Card>

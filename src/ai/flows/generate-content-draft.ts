@@ -33,7 +33,7 @@ const GenerateContentDraftOutputSchema = z.object({
   draft: z
     .string()
     .describe(
-      'A structured draft with Titular, Cuerpo and CTA fields, optimized for the selected tone. The output should be formatted as "Titular: [content]\nCuerpo: [content]\nCTA: [content]".'
+      'A structured draft with "Oferta de valor", "Problema / solución", "Historia / contexto", "Conexión territorial", and "CTA sugerido" fields, optimized for the selected tone. The output should be formatted as "Field: [content]\\n...".'
     ),
 });
 export type GenerateContentDraftOutput = z.infer<typeof GenerateContentDraftOutputSchema>;
@@ -53,7 +53,12 @@ const prompt = ai.definePrompt({
 Idea: {{{idea}}}
 Tone: {{{selectedTone}}}
 
-The draft should include a "Titular", a "Cuerpo" and a "CTA" (Call to Action). The output MUST be a string formatted exactly like this: "Titular: [content for title]\nCuerpo: [content for body]\nCTA: [content for call to action]".
+The draft should include the following sections: "Oferta de valor", "Problema / solución", "Historia / contexto", "Conexión territorial", and "CTA sugerido". The output MUST be a string formatted exactly like this, with each field on a new line:
+Oferta de valor: [content]
+Problema / solución: [content]
+Historia / contexto: [content]
+Conexión territorial: [content]
+CTA sugerido: [content]
 `,
 });
 
@@ -68,5 +73,7 @@ const generateContentDraftFlow = ai.defineFlow(
     return output!;
   }
 );
+
+    
 
     
