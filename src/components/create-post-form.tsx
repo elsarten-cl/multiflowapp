@@ -295,40 +295,9 @@ export function CreatePostForm() {
                 </FormItem>
               )}
             />
-          </CardContent>
-          <CardFooter>
-            <Button type="button" onClick={handleGenerateDraft} disabled={isDraftPending}>
-              {isDraftPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-              Generar Borrador
-            </Button>
-          </CardFooter>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>2. Contenido Principal</CardTitle>
-            <CardDescription>
-              Define los elementos clave de tu publicación. Puedes editarlos manualmente o generarlos con IA.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <FormField
-              control={form.control}
-              name="tituloInterno"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Título Interno</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ej: Campaña Verano 2024 - Post 1" {...field} />
-                  </FormControl>
-                  <FormDescription>Un nombre para identificar esta publicación internamente.</FormDescription>
-                  <FormMessage>{publishState.errors?.tituloInterno?.[0] || formState.errors.tituloInterno?.message}</FormMessage>
-                </FormItem>
-              )}
-            />
-            
             {postType === 'producto' && (
-                <>
+                <div className="space-y-6 pt-4 border-t">
                     <FormField
                         control={form.control}
                         name="nombreProducto"
@@ -380,9 +349,40 @@ export function CreatePostForm() {
                             </FormItem>
                         )}
                     />
-                </>
+                </div>
             )}
+          </CardContent>
+          <CardFooter>
+            <Button type="button" onClick={handleGenerateDraft} disabled={isDraftPending}>
+              {isDraftPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              Generar Borrador
+            </Button>
+          </CardFooter>
+        </Card>
 
+        <Card>
+          <CardHeader>
+            <CardTitle>2. Contenido Principal</CardTitle>
+            <CardDescription>
+              Define los elementos clave de tu publicación. Puedes editarlos manually o generarlos con IA.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <FormField
+              control={form.control}
+              name="tituloInterno"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Título Interno</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ej: Campaña Verano 2024 - Post 1" {...field} />
+                  </FormControl>
+                  <FormDescription>Un nombre para identificar esta publicación internamente.</FormDescription>
+                  <FormMessage>{publishState.errors?.tituloInterno?.[0] || formState.errors.tituloInterno?.message}</FormMessage>
+                </FormItem>
+              )}
+            />
+            
             <FormField
               control={form.control}
               name="ofertaDeValor"
