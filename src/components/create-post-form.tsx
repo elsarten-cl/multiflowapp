@@ -47,7 +47,7 @@ export function CreatePostForm() {
     },
   });
 
-  const { control, setValue } = form;
+  const { control, setValue, trigger } = form;
 
   const ofertaDeValor = useWatch({ control, name: 'ofertaDeValor' });
   const problemaSolucion = useWatch({ control, name: 'problemaSolucion' });
@@ -55,6 +55,12 @@ export function CreatePostForm() {
   const conexionTerritorial = useWatch({ control, name: 'conexionTerritorial' });
   const ctaSugerido = useWatch({ control, name: 'ctaSugerido' });
   const imageUrl = useWatch({ control, name: 'imageUrl' });
+
+  const textoBaseRef = useRef<HTMLTextAreaElement>(null);
+  const ofertaDeValorRef = useRef<HTMLTextAreaElement>(null);
+  const problemaSolucionRef = useRef<HTMLTextAreaElement>(null);
+  const historiaContextoRef = useRef<HTMLTextAreaElement>(null);
+  const conexionTerritorialRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const unifiedText = [
@@ -65,12 +71,19 @@ export function CreatePostForm() {
       ctaSugerido
     ].filter(Boolean).join('\n\n');
     setValue('textoBase', unifiedText, { shouldValidate: true, shouldDirty: true });
+    requestAnimationFrame(() => {
+        autoResizeTextarea(textoBaseRef.current);
+    });
   }, [ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, ctaSugerido, setValue]);
 
 
   const [publishState, publishFormAction] = useActionState(publishAction, initialFormState);
 
   useEffect(() => {
+    if (publishState.message && !publishState.success && publishState.errors) {
+        // Don't show toast for validation errors, they appear in the form
+        return;
+    }
     if (publishState.message) {
       toast({
         title: publishState.success ? 'Éxito' : 'Error',
@@ -90,7 +103,6 @@ export function CreatePostForm() {
       formData.append('tono', form.getValues('tono'));
       const result = await generateDraftAction(initialFormState, formData);
       if (result.success && result.data?.draft) {
-        // More robust parsing based on the expected structure
         const draft = result.data.draft;
         const fields = ['Oferta de valor', 'Problema / solución', 'Historia / contexto', 'Conexión territorial', 'CTA sugerido'];
         const fieldMap: Record<string, keyof CreatePostInput> = {
@@ -110,6 +122,13 @@ export function CreatePostForm() {
             }
         });
         
+        requestAnimationFrame(() => {
+            autoResizeTextarea(ofertaDeValorRef.current);
+            autoResizeTextarea(problemaSolucionRef.current);
+            autoResizeTextarea(historiaContextoRef.current);
+            autoResizeTextarea(conexionTerritorialRef.current);
+        });
+
         toast({ title: 'Borrador generado', description: 'Los campos de contenido han sido actualizados.' });
       } else {
         toast({ title: 'Error', description: result.message, variant: 'destructive' });
@@ -125,6 +144,9 @@ export function CreatePostForm() {
       const result = await generateContentAction(initialFormState, formData);
       if (result.success && result.data?.content) {
         setValue('textoBase', result.data.content, { shouldValidate: true });
+         requestAnimationFrame(() => {
+            autoResizeTextarea(textoBaseRef.current);
+        });
         toast({ title: 'Contenido optimizado', description: 'El texto unificado ha sido actualizado.' });
       } else {
         toast({ title: 'Error', description: result.message, variant: 'destructive' });
@@ -169,6 +191,7 @@ export function CreatePostForm() {
                   <FormDescription>
                     Describe brevemente sobre qué quieres escribir.
                   </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -240,6 +263,8 @@ export function CreatePostForm() {
                       onInput={(e) => autoResizeTextarea(e.currentTarget)}
                       ref={(e) => {
                         field.ref(e);
+                        // @ts-ignore
+                        ofertaDeValorRef.current = e;
                         autoResizeTextarea(e);
                       }}
                     />
@@ -263,6 +288,8 @@ export function CreatePostForm() {
                       onInput={(e) => autoResizeTextarea(e.currentTarget)}
                        ref={(e) => {
                         field.ref(e);
+                        // @ts-ignore
+                        problemaSolucionRef.current = e;
                         autoResizeTextarea(e);
                       }}
                     />
@@ -286,6 +313,8 @@ export function CreatePostForm() {
                       onInput={(e) => autoResizeTextarea(e.currentTarget)}
                        ref={(e) => {
                         field.ref(e);
+                        // @ts-ignore
+                        historiaContextoRef.current = e;
                         autoResizeTextarea(e);
                       }}
                     />
@@ -309,6 +338,8 @@ export function CreatePostForm() {
                       onInput={(e) => autoResizeTextarea(e.currentTarget)}
                        ref={(e) => {
                         field.ref(e);
+                        // @ts-ignore
+                        conexionTerritorialRef.current = e;
                         autoResizeTextarea(e);
                       }}
                     />
@@ -380,10 +411,14 @@ export function CreatePostForm() {
                             <Textarea
                                 className="resize-none bg-background overflow-hidden" 
                                 {...field}
-                                onInput={(e) => autoResizeTextarea(e.currentTarget)}
+                                onInput={(e) => {
+                                    field.onChange(e);
+                                    autoResizeTextarea(e.currentTarget);
+                                }}
                                 ref={(e) => {
                                     field.ref(e);
-                                    autoResizeTextarea(e);
+                                    // @ts-ignore
+                                    textoBaseRef.current = e;
                                 }}
                             />
                         </FormControl>
