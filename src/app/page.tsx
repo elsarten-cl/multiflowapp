@@ -13,9 +13,6 @@ export default function Home() {
           <Icons.logo className="h-8 w-8 text-primary" />
           <span className="text-xl font-bold">MultiFlowApp</span>
         </Link>
-        <Button asChild>
-          <Link href="/dashboard/create-post">Empezar a Crear</Link>
-        </Button>
       </header>
 
       <main className="flex-grow">
