@@ -7,6 +7,7 @@ import { generateContentDraft } from '@/ai/flows/generate-content-draft';
 import { generateContentWithTone } from '@/ai/flows/generate-content-with-tone';
 import { getFirebaseAdminApp } from '@/lib/firebase-admin';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { generateContentInSelectedTone, PlatformEnum } from '@/ai/flows/generate-content-in-selected-tone';
 
 export type FormState = {
   message: string;
@@ -56,12 +57,43 @@ export async function generateContentAction(prevState: FormState, formData: Form
   }
 }
 
+export async function generatePreviewAction(prevState: FormState, formData: FormData): Promise<FormState> {
+    const textInput = formData.get('textoBase') as string;
+    const rawTone = formData.get('tono');
+
+    const toneResult = ToneEnum.safeParse(rawTone);
+
+    if (!textInput || !toneResult.success) {
+        return { success: false, message: 'El texto base y el tono son requeridos para generar vistas previas.' };
+    }
+
+    try {
+        const platforms: z.infer<typeof PlatformEnum>[] = ['facebook', 'instagram', 'wordpress'];
+        const previews = await Promise.all(
+            platforms.map(platform => 
+                generateContentInSelectedTone({ textInput, selectedTone: toneResult.data, platform })
+            )
+        );
+
+        const previewData = {
+            facebook: previews[0].content,
+            instagram: previews[1].content,
+            wordpress: previews[2].content,
+        };
+
+        return { success: true, message: 'Vistas previas generadas.', data: previewData };
+    } catch (e) {
+        console.error(e);
+        return { success: false, message: 'Error al generar las vistas previas.' };
+    }
+}
+
+
 // Action to publish/save the post
 export async function publishAction(prevState: FormState, formData: FormData): Promise<FormState> {
   const validatedFields = CreatePostSchema.safeParse(Object.fromEntries(formData.entries()));
-
+  
   if (!validatedFields.success) {
-    console.log(validatedFields.error.flatten().fieldErrors);
     return {
       success: false,
       message: 'Por favor, corrige los errores del formulario.',
@@ -77,7 +109,8 @@ export async function publishAction(prevState: FormState, formData: FormData): P
     textoBase: data.textoBase,
     tono: data.tono,
     imageUrl: data.imageUrl,
-    status: 'borrador', // Always save as draft now
+    postType: data.postType,
+    status: 'borrador',
     createdAt: now,
     updatedAt: now,
   };
@@ -118,5 +151,3 @@ export async function publishAction(prevState: FormState, formData: FormData): P
     return { success: false, message: `Error al procesar la publicación: ${errorMessage}` };
   }
 }
-
-    

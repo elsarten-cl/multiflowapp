@@ -10,12 +10,22 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
+export const PlatformEnum = z.enum(['facebook', 'instagram', 'wordpress']);
+
 const GenerateContentInSelectedToneInputSchema = z.object({
-  draft: z.string().describe('The completed draft content.'),
-  platform: z
-    .enum(['facebook', 'instagram', 'wordpress'])
-    .describe('The platform for which to generate content.'),
-  tone: z.string().describe('The desired tone of the content (e.g., professional, casual).'),
+  textInput: z.string().describe('The base text content.'),
+  selectedTone: z
+    .enum([
+      'Persuasivo',
+      'Estrategico',
+      'Influencer',
+      'Inspirador',
+      'Periodista',
+      'Corporativo',
+      'Humoristico',
+    ])
+    .describe('The tone of voice for the content.'),
+  platform: PlatformEnum.describe('The platform for which to generate content.'),
 });
 export type GenerateContentInSelectedToneInput = z.infer<
   typeof GenerateContentInSelectedToneInputSchema
@@ -38,12 +48,12 @@ const prompt = ai.definePrompt({
   name: 'generateContentInSelectedTonePrompt',
   input: {schema: GenerateContentInSelectedToneInputSchema},
   output: {schema: GenerateContentInSelectedToneOutputSchema},
-  prompt: `You are an expert social media manager. Generate content optimized for {{{platform}}} based on the following draft and desired tone.
+  prompt: `You are an expert social media manager. Generate content optimized for {{{platform}}} based on the following text and desired tone.
 
-Draft: {{{draft}}}
-Tone: {{{tone}}}
+Text: {{{textInput}}}
+Tone: {{{selectedTone}}}
 
-Consider the platform's specific requirements and best practices.`,
+Consider the platform's specific requirements and best practices (e.g., character limits, hashtags for Instagram, formatting for WordPress).`,
 });
 
 const generateContentInSelectedToneFlow = ai.defineFlow(
