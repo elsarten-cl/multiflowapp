@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'MultiFlow',
+  title: 'MultiFlowApp',
   description: 'Generate content for multiple platforms with AI.',
 };
 

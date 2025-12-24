@@ -11,8 +11,11 @@ export default function Home() {
       <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Icons.logo className="h-8 w-8 text-primary" />
-          <span className="text-xl font-bold">MultiPostFlow</span>
+          <span className="text-xl font-bold">MultiFlowApp</span>
         </Link>
+        <Button asChild>
+          <Link href="/dashboard/create-post">Empezar a Crear</Link>
+        </Button>
       </header>
 
       <main className="flex-grow">
@@ -25,7 +28,7 @@ export default function Home() {
               Crea una vez, publica en todas partes.
             </h1>
             <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
-              MultiPostFlow transforma tus ideas en contenido pulido para todas tus plataformas,
+              MultiFlowApp transforma tus ideas en contenido pulido para todas tus plataformas,
               ahorrándote tiempo y esfuerzo.
             </p>
             <Button size="lg" asChild>
@@ -41,7 +44,7 @@ export default function Home() {
                 Un flujo de trabajo de contenido simplificado
               </h2>
               <p className="mt-4 max-w-xl mx-auto text-muted-foreground">
-                Desde la idea hasta la publicación, MultiPostFlow te asiste en cada paso.
+                Desde la idea hasta la publicación, MultiFlowApp te asiste en cada paso.
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
@@ -94,7 +97,7 @@ export default function Home() {
                 </h2>
                 <p className="text-lg text-primary-foreground/80 mb-6">
                   Únete a cientos de creadores que ya están ahorrando horas de trabajo
-                  con MultiPostFlow.
+                  con MultiFlowApp.
                 </p>
                 <Button size="lg" variant="secondary" asChild>
                   <Link href="/dashboard/create-post">Ir al Creador</Link>
@@ -111,9 +114,9 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
           <div className="flex justify-center items-center gap-2 mb-2">
             <Icons.logo className="h-6 w-6" />
-            <span className="text-lg font-semibold">MultiPostFlow</span>
+            <span className="text-lg font-semibold">MultiFlowApp</span>
           </div>
-          <p>&copy; {new Date().getFullYear()} MultiPostFlow. Todos los derechos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} MultiFlowApp. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>

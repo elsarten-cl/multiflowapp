@@ -2,30 +2,31 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FilePlus, LayoutGrid } from 'lucide-react';
-import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 
 export function DashboardNav() {
   const pathname = usePathname();
 
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <SidebarMenuButton asChild isActive={pathname === '/dashboard/create-post'}>
-          <Link href="/dashboard/create-post">
-            <FilePlus />
-            Crear Publicación
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton asChild disabled>
-          <Link href="#">
-            <LayoutGrid />
-            Mis Publicaciones
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    </SidebarMenu>
+    <nav className="hidden md:flex gap-6">
+      <Link
+        href="/dashboard/create-post"
+        className={cn(
+          'flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm',
+          pathname === '/dashboard/create-post' ? 'text-foreground' : 'text-foreground/60'
+        )}
+      >
+        Crear Publicación
+      </Link>
+      <Link
+        href="#"
+        className={cn(
+            'flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm text-foreground/60 cursor-not-allowed opacity-50'
+        )}
+        onClick={(e) => e.preventDefault()}
+      >
+        Mis Publicaciones
+      </Link>
+    </nav>
   );
 }
