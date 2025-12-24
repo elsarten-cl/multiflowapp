@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useTransition, useActionState, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useActionState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Sparkles, Send, Upload, Facebook, Instagram, Globe } from 'lucide-react';
+import { Loader2, Sparkles, Send, Upload, Facebook, Instagram } from 'lucide-react';
 import Image from 'next/image';
 
-import { CreatePostSchema, TONES, type CreatePostInput } from '@/lib/schemas';
-import { generateDraftAction, generateContentAction, publishAction, generatePreviewAction } from '@/app/actions';
+import { CreatePostSchema, TONES, PostTypeEnum, type CreatePostInput } from '@/lib/schemas';
+import { generateDraftAction, generateContentAndPreviewsAction, publishAction } from '@/app/actions';
 
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -16,11 +16,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from './ui/skeleton';
 
-const initialFormState = { message: '', errors: {}, success: false, pending: false };
+const initialFormState = { message: '', errors: {}, success: false };
 
 const autoResizeTextarea = (element: HTMLTextAreaElement | null) => {
     if (element) {
@@ -31,9 +30,10 @@ const autoResizeTextarea = (element: HTMLTextAreaElement | null) => {
 
 export function CreatePostForm() {
   const { toast } = useToast();
-  const [isDraftPending, startDraftTransition] = useTransition();
-  const [isContentPending, startContentTransition] = useTransition();
-  const [isPreviewPending, startPreviewTransition] = useTransition();
+  
+  const [draftState, draftFormAction, isDraftPending] = useActionState(generateDraftAction, initialFormState);
+  const [contentState, contentFormAction, isContentPending] = useActionState(generateContentAndPreviewsAction, initialFormState);
+  const [publishState, publishFormAction, isPublishPending] = useActionState(publishAction, initialFormState);
 
   const [previews, setPreviews] = useState({ facebook: '', instagram: '' });
   
@@ -55,9 +55,10 @@ export function CreatePostForm() {
       precio: '',
       descripcionProducto: '',
     },
+    context: publishState, 
   });
 
-  const { control, setValue, trigger, getValues, formState } = form;
+  const { control, setValue, getValues } = form;
 
   const ofertaDeValor = useWatch({ control, name: 'ofertaDeValor' });
   const problemaSolucion = useWatch({ control, name: 'problemaSolucion' });
@@ -98,97 +99,82 @@ export function CreatePostForm() {
   }, [textoBaseValue, ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, form.watch('descripcionProducto')]);
 
 
-  const [publishState, publishFormAction] = useActionState(publishAction, initialFormState);
-
   useEffect(() => {
-    if (publishState.message && !publishState.pending) {
-        if(publishState.success) {
-            toast({
-                title: 'Éxito',
-                description: publishState.message,
-            });
-            form.reset();
-            setPreviews({ facebook: '', instagram: '' });
-        } else if (!publishState.errors) { 
-            toast({
-                title: 'Error',
-                description: publishState.message,
-                variant: 'destructive',
-            });
-        }
+    if (publishState.message) {
+      if (publishState.success) {
+        toast({
+          title: 'Éxito',
+          description: publishState.message,
+        });
+        form.reset();
+        setPreviews({ facebook: '', instagram: '' });
+      } else {
+        toast({
+          title: 'Error',
+          description: publishState.message,
+          variant: 'destructive',
+        });
+      }
+    }
+    if (publishState.errors) {
+        Object.entries(publishState.errors).forEach(([field, errors]) => {
+            if (errors) {
+                 form.setError(field as keyof CreatePostInput, {
+                    type: 'manual',
+                    message: errors.join(', '),
+                });
+            }
+        });
     }
   }, [publishState, toast, form]);
 
-  const handleGenerateDraft = () => {
-    startDraftTransition(async () => {
-      const formData = new FormData();
-      formData.append('idea', form.getValues('idea') || '');
-      formData.append('tono', form.getValues('tono'));
-      formData.append('postType', form.getValues('postType'));
+  useEffect(() => {
+    if (draftState.success && draftState.data?.draft) {
+      const draft = draftState.data.draft;
+      const fields = ['Título de la publicación', 'Oferta de valor', 'Problema / solución', 'Historia / contexto', 'Conexión territorial', 'CTA sugerido'];
+      const fieldMap: Record<string, keyof CreatePostInput> = {
+        'Título de la publicación': 'tituloPublicacion',
+        'Oferta de valor': 'ofertaDeValor',
+        'Problema / solución': 'problemaSolucion',
+        'Historia / contexto': 'historiaContexto',
+        'Conexión territorial': 'conexionTerritorial',
+        'CTA sugerido': 'ctaSugerido',
+      };
+
+      fields.forEach(field => {
+          const regex = new RegExp(`${field}:(.*?)(?=\n[A-Z]|$|\\n\\n)`, 's');
+          const match = draft.match(regex);
+          if (match) {
+              const key = fieldMap[field];
+              setValue(key, match[1].trim(), { shouldValidate: true, shouldDirty: true });
+          }
+      });
       
-      const result = await generateDraftAction(initialFormState, formData);
-      if (result.success && result.data?.draft) {
-        const draft = result.data.draft;
-        const fields = ['Título de la publicación', 'Oferta de valor', 'Problema / solución', 'Historia / contexto', 'Conexión territorial', 'CTA sugerido'];
-        const fieldMap: Record<string, keyof CreatePostInput> = {
-          'Título de la publicación': 'tituloPublicacion',
-          'Oferta de valor': 'ofertaDeValor',
-          'Problema / solución': 'problemaSolucion',
-          'Historia / contexto': 'historiaContexto',
-          'Conexión territorial': 'conexionTerritorial',
-          'CTA sugerido': 'ctaSugerido',
-        };
-  
-        fields.forEach(field => {
-            const regex = new RegExp(`${field}:(.*?)(?=\n[A-Z]|$|\\n\\n)`, 's');
-            const match = draft.match(regex);
-            if (match) {
-                const key = fieldMap[field];
-                setValue(key, match[1].trim(), { shouldValidate: true, shouldDirty: true });
-            }
-        });
-        
-        requestAnimationFrame(() => {
-            allRefs.forEach(ref => autoResizeTextarea(ref.current));
-        });
+      requestAnimationFrame(() => {
+          allRefs.forEach(ref => autoResizeTextarea(ref.current));
+      });
 
-        toast({ title: 'Borrador generado', description: 'Los campos de contenido han sido actualizados.' });
-      } else {
-        toast({ title: 'Error', description: result.message, variant: 'destructive' });
-      }
-    });
-  };
+      toast({ title: 'Borrador generado', description: 'Los campos de contenido han sido actualizados.' });
+    } else if (draftState.message && !draftState.success) {
+      toast({ title: 'Error', description: draftState.message, variant: 'destructive' });
+    }
+  }, [draftState, setValue, toast, allRefs]);
 
-  const handleGenerateContentAndPreviews = () => {
-    startContentTransition(async () => {
-      const formData = new FormData();
-      formData.append('textoBase', form.getValues('textoBase'));
-      formData.append('tono', form.getValues('tono'));
-
-      const contentPromise = generateContentAction(initialFormState, formData);
-      const previewPromise = generatePreviewAction(initialFormState, formData);
-      
-      const [contentResult, previewResult] = await Promise.all([contentPromise, previewPromise]);
-
-      let hasError = false;
-
-      if (contentResult.success && contentResult.data?.content) {
-        setValue('textoBase', contentResult.data.content, { shouldValidate: true, shouldDirty: true });
+  useEffect(() => {
+    if (contentState.success && contentState.data) {
+      if (contentState.data.optimizedContent) {
+        setValue('textoBase', contentState.data.optimizedContent, { shouldValidate: true, shouldDirty: true });
         toast({ title: 'Contenido optimizado', description: 'El texto unificado ha sido actualizado.' });
-      } else {
-        hasError = true;
-        toast({ title: 'Error de Contenido', description: contentResult.message, variant: 'destructive' });
       }
-
-      if (previewResult.success && previewResult.data) {
-        setPreviews(previewResult.data);
+      if (contentState.data.previews) {
+        setPreviews(contentState.data.previews);
         toast({ title: 'Vistas previas generadas', description: 'Se generó el contenido para cada plataforma.' });
-      } else {
-        hasError = true;
-        toast({ title: 'Error de Vistas Previas', description: previewResult.message, variant: 'destructive' });
       }
-    });
-  };
+    } else if (contentState.message && !contentState.success) {
+      toast({ title: 'Error de Contenido', description: contentState.message, variant: 'destructive' });
+    }
+  }, [contentState, setValue, toast]);
+
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -259,7 +245,7 @@ export function CreatePostForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo de Publicación</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un tipo" />
@@ -333,7 +319,7 @@ export function CreatePostForm() {
             )}
           </CardContent>
           <CardFooter>
-            <Button type="button" onClick={handleGenerateDraft} disabled={isDraftPending}>
+            <Button type="button" onClick={() => draftFormAction(new FormData(form.control.ownerDocument.forms[0]))} disabled={isDraftPending}>
               {isDraftPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Generar Borrador
             </Button>
@@ -344,7 +330,7 @@ export function CreatePostForm() {
           <CardHeader>
             <CardTitle>2. Contenido Principal</CardTitle>
             <CardDescription>
-              Define los elementos clave de tu publicación. Puedes editarlos manualmente o generarlos con IA.
+              Define los elementos clave de tu publicación. Puedes editarlos manually o generarlos con IA.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -358,7 +344,7 @@ export function CreatePostForm() {
                     <Input placeholder="Ej: Nueva Crema Hidratante para una Piel Radiante" {...field} />
                   </FormControl>
                   <FormDescription>Un título atractivo para tu publicación.</FormDescription>
-                  <FormMessage>{form.formState.errors.tituloPublicacion?.message}</FormMessage>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -384,7 +370,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{form.formState.errors.ofertaDeValor?.message}</FormMessage>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -410,7 +396,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{form.formState.errors.problemaSolucion?.message}</FormMessage>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -436,7 +422,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{form.formState.errors.historiaContexto?.message}</FormMessage>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -462,7 +448,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{form.formState.errors.conexionTerritorial?.message}</FormMessage>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -476,7 +462,7 @@ export function CreatePostForm() {
                   <FormControl>
                     <Input placeholder="Ej: ¡Compra ahora!, Más información aquí" {...field} />
                   </FormControl>
-                  <FormMessage>{form.formState.errors.ctaSugerido?.message}</FormMessage>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -539,13 +525,13 @@ export function CreatePostForm() {
                                 }}
                             />
                         </FormControl>
-                        <FormMessage>{form.formState.errors.textoBase?.message}</FormMessage>
+                        <FormMessage />
                         </FormItem>
                     )}
                     />
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
-                     <Button type="button" variant="outline" className="w-full" onClick={handleGenerateContentAndPreviews} disabled={isContentPending}>
+                     <Button type="button" variant="outline" className="w-full" onClick={() => contentFormAction(new FormData(form.control.ownerDocument.forms[0]))} disabled={isContentPending}>
                         {isContentPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                         Optimizar Texto y Generar Vistas Previas
                     </Button>
@@ -591,8 +577,8 @@ export function CreatePostForm() {
 
           </CardContent>
           <CardFooter>
-            <Button type="submit" size="lg" disabled={publishState.pending}>
-              {publishState.pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+            <Button type="submit" size="lg" disabled={isPublishPending}>
+              {isPublishPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
               Guardar y Enviar
             </Button>
           </CardFooter>

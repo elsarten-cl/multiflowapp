@@ -14,17 +14,16 @@ export type FormState = {
   errors?: Record<string, string[] | undefined> | string;
   data?: any;
   success?: boolean;
-  pending?: boolean;
 };
 
 // Action to generate a draft
-export async function generateDraftAction(prevState: FormState, formData: FormData): Promise<FormState> {
+export async function generateDraftAction(prevState: any, formData: FormData) {
   const idea = formData.get('idea') as string;
   const rawTone = formData.get('tono');
-  const postType = formData.get('postType') as z.infer<typeof ToneEnum>;
+  const postType = formData.get('postType') as z.infer<typeof PostTypeEnum>;
 
   const toneResult = ToneEnum.safeParse(rawTone);
-  const postTypeResult = z.enum(['articulo', 'producto']).safeParse(postType);
+  const postTypeResult = PostTypeEnum.safeParse(postType);
 
   if (!idea || !toneResult.success || !postTypeResult.success) {
     return { success: false, message: "La idea, un tono válido y el tipo de publicación son requeridos para generar un borrador." };
@@ -39,27 +38,8 @@ export async function generateDraftAction(prevState: FormState, formData: FormDa
   }
 }
 
-// Action to generate final content
-export async function generateContentAction(prevState: FormState, formData: FormData): Promise<FormState> {
-  const textInput = formData.get('textoBase') as string;
-  const rawTone = formData.get('tono');
-
-  const toneResult = ToneEnum.safeParse(rawTone);
-
-  if (!textInput || !toneResult.success) {
-    return { success: false, message: "El texto base y un tono válido son requeridos." };
-  }
-
-  try {
-    const result = await generateContentWithTone({ textInput, selectedTone: toneResult.data });
-    return { success: true, message: "Contenido generado.", data: result };
-  } catch (e) {
-    console.error(e);
-    return { success: false, message: "Error al generar contenido." };
-  }
-}
-
-export async function generatePreviewAction(prevState: FormState, formData: FormData): Promise<FormState> {
+// Action to generate final content and previews
+export async function generateContentAndPreviewsAction(prevState: any, formData: FormData) {
     const textInput = formData.get('textoBase') as string;
     const rawTone = formData.get('tono');
 
@@ -71,21 +51,26 @@ export async function generatePreviewAction(prevState: FormState, formData: Form
 
     try {
         const platforms: z.infer<typeof PlatformEnum>[] = ['facebook', 'instagram'];
-        const previews = await Promise.all(
-            platforms.map(platform => 
+        
+        const [contentResult, ...previews] = await Promise.all([
+             generateContentWithTone({ textInput, selectedTone: toneResult.data }),
+            ...platforms.map(platform => 
                 generateContentInSelectedTone({ textInput, selectedTone: toneResult.data, platform })
             )
-        );
+        ]);
 
-        const previewData = {
-            facebook: previews[0].content,
-            instagram: previews[1].content,
+        const responseData = {
+            optimizedContent: contentResult.content,
+            previews: {
+                facebook: previews[0].content,
+                instagram: previews[1].content,
+            }
         };
 
-        return { success: true, message: 'Vistas previas generadas.', data: previewData };
+        return { success: true, message: 'Contenido y vistas previas generadas.', data: responseData };
     } catch (e) {
         console.error(e);
-        return { success: false, message: 'Error al generar las vistas previas.' };
+        return { success: false, message: 'Error al generar el contenido y las vistas previas.' };
     }
 }
 
@@ -103,55 +88,65 @@ export async function publishAction(prevState: FormState, formData: FormData): P
   }
 
   const { data } = validatedFields;
-  const now = Timestamp.now();
   
-  const postData = {
-    tituloPublicacion: data.tituloPublicacion,
-    textoBase: data.textoBase,
-    tono: data.tono,
-    imageUrl: data.imageUrl,
-    postType: data.postType,
-    status: 'borrador',
-    createdAt: now,
-    updatedAt: now,
-    nombreProducto: data.nombreProducto,
-    precio: data.precio,
-    descripcionProducto: data.descripcionProducto,
-  };
-
   try {
-    getFirebaseAdminApp();
-    const db = getFirestore();
+    const app = getFirebaseAdminApp();
+    const db = getFirestore(app);
+    const now = Timestamp.now();
+    
+    const postData = {
+      tituloPublicacion: data.tituloPublicacion,
+      textoBase: data.textoBase,
+      tono: data.tono,
+      imageUrl: data.imageUrl,
+      postType: data.postType,
+      status: 'borrador',
+      createdAt: now,
+      updatedAt: now,
+      nombreProducto: data.nombreProducto,
+      precio: data.precio,
+      descripcionProducto: data.descripcionProducto,
+    };
+
     const docRef = await db.collection('posts').add(postData);
 
     let message = `Borrador "${data.tituloPublicacion}" guardado con éxito.`;
 
     const webhookUrl = process.env.MAKE_WEBHOOK_URL;
-    if (!webhookUrl) {
-      console.error('MAKE_WEBHOOK_URL is not set.');
-      await docRef.update({ status: 'error', updatedAt: Timestamp.now() });
-      return { success: false, message: 'Borrador guardado, pero la publicación falló: El webhook no está configurado.' };
-    }
-    
-    const response = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...postData, id: docRef.id }),
-    });
+    if (webhookUrl) {
+      try {
+        const response = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...postData, id: docRef.id }),
+        });
 
-    if (response.ok) {
-      await docRef.update({ status: 'publicado', updatedAt: Timestamp.now() });
-      message = `Publicación "${data.tituloPublicacion}" enviada con éxito.`;
+        if (response.ok) {
+          await docRef.update({ status: 'publicado', updatedAt: Timestamp.now() });
+          message = `Publicación "${data.tituloPublicacion}" enviada con éxito.`;
+        } else {
+          await docRef.update({ status: 'error', updatedAt: Timestamp.now() });
+          message = `Borrador guardado, pero la publicación falló (Webhook: ${response.status}).`;
+        }
+      } catch (fetchError) {
+        await docRef.update({ status: 'error', updatedAt: Timestamp.now() });
+        message = `Borrador guardado, pero la publicación falló (Error de red).`;
+        console.error('Webhook fetch error:', fetchError);
+      }
     } else {
-      await docRef.update({ status: 'error', updatedAt: Timestamp.now() });
-      throw new Error(`Webhook falló con estado: ${response.status}`);
+      console.warn('MAKE_WEBHOOK_URL is not set. Skipping webhook call.');
+      // Keep status as 'borrador'
     }
     
     revalidatePath('/dashboard/create-post');
     return { success: true, message };
   } catch (e) {
-    console.error(e);
+    console.error('Error in publishAction:', e);
     const errorMessage = e instanceof Error ? e.message : 'Un error desconocido ocurrió.';
-    return { success: false, message: `Error al procesar la publicación: ${errorMessage}` };
+    return { 
+      success: false, 
+      message: `Error al procesar la publicación: ${errorMessage}`,
+      errors: typeof e === 'object' && e !== null && 'message' in e ? String(e.message) : undefined
+    };
   }
 }

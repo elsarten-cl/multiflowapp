@@ -14,7 +14,7 @@ export const ToneEnum = z.enum(TONES);
 
 export const PostTypeEnum = z.enum(['articulo', 'producto']);
 
-export const PlatformEnum = z.enum(['facebook', 'instagram', 'wordpress']);
+export const PlatformEnum = z.enum(['facebook', 'instagram']);
 
 export const CreatePostSchema = z.object({
   idea: z.string().optional(),
