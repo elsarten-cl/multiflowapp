@@ -13,6 +13,7 @@ export type FormState = {
   errors?: Record<string, string[] | undefined> | string;
   data?: any;
   success?: boolean;
+  pending?: boolean;
 };
 
 // Action to generate a draft
@@ -72,8 +73,11 @@ export async function publishAction(prevState: FormState, formData: FormData): P
   const now = Timestamp.now();
   
   const postData = {
-    ...data,
-    status: data.publishMode === 'programado' ? 'programado' : 'borrador',
+    tituloInterno: data.tituloInterno,
+    textoBase: data.textoBase,
+    tono: data.tono,
+    imageUrl: data.imageUrl,
+    status: 'borrador', // Always save as draft now
     createdAt: now,
     updatedAt: now,
   };
@@ -85,27 +89,25 @@ export async function publishAction(prevState: FormState, formData: FormData): P
 
     let message = `Borrador "${data.tituloInterno}" guardado con éxito.`;
 
-    if (data.publishMode === 'ahora') {
-      const webhookUrl = process.env.MAKE_WEBHOOK_URL;
-      if (!webhookUrl) {
-        console.error('MAKE_WEBHOOK_URL is not set.');
-        await docRef.update({ status: 'error', updatedAt: Timestamp.now() });
-        return { success: false, message: 'Borrador guardado, pero la publicación falló: El webhook no está configurado.' };
-      }
-      
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...postData, id: docRef.id }),
-      });
+    const webhookUrl = process.env.MAKE_WEBHOOK_URL;
+    if (!webhookUrl) {
+      console.error('MAKE_WEBHOOK_URL is not set.');
+      await docRef.update({ status: 'error', updatedAt: Timestamp.now() });
+      return { success: false, message: 'Borrador guardado, pero la publicación falló: El webhook no está configurado.' };
+    }
+    
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...postData, id: docRef.id }),
+    });
 
-      if (response.ok) {
-        await docRef.update({ status: 'publicado', updatedAt: Timestamp.now() });
-        message = `Publicación "${data.tituloInterno}" enviada con éxito.`;
-      } else {
-        await docRef.update({ status: 'error', updatedAt: Timestamp.now() });
-        throw new Error(`Webhook falló con estado: ${response.status}`);
-      }
+    if (response.ok) {
+      await docRef.update({ status: 'publicado', updatedAt: Timestamp.now() });
+      message = `Publicación "${data.tituloInterno}" enviada con éxito.`;
+    } else {
+      await docRef.update({ status: 'error', updatedAt: Timestamp.now() });
+      throw new Error(`Webhook falló con estado: ${response.status}`);
     }
     
     revalidatePath('/dashboard/create-post');
@@ -116,3 +118,5 @@ export async function publishAction(prevState: FormState, formData: FormData): P
     return { success: false, message: `Error al procesar la publicación: ${errorMessage}` };
   }
 }
+
+    
