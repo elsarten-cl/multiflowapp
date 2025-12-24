@@ -11,24 +11,20 @@ export function DashboardNav() {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <Link href="/dashboard/create-post" passHref legacyBehavior>
-          <SidebarMenuButton asChild isActive={pathname === '/dashboard/create-post'}>
-            <a>
-              <FilePlus />
-              Crear Publicación
-            </a>
-          </SidebarMenuButton>
-        </Link>
+        <SidebarMenuButton asChild isActive={pathname === '/dashboard/create-post'}>
+          <Link href="/dashboard/create-post">
+            <FilePlus />
+            Crear Publicación
+          </Link>
+        </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <Link href="#" passHref legacyBehavior>
-          <SidebarMenuButton asChild disabled>
-            <a>
-              <LayoutGrid />
-              Mis Publicaciones
-            </a>
-          </SidebarMenuButton>
-        </Link>
+        <SidebarMenuButton asChild disabled>
+          <Link href="#">
+            <LayoutGrid />
+            Mis Publicaciones
+          </Link>
+        </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
   );
