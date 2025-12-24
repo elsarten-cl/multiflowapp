@@ -1,4 +1,4 @@
-import { CreatePostForm } from '@/components/create-post-form';
+import { CreatePostFormClient } from '@/components/create-post-form-client';
 
 export default function CreatePostPage() {
   return (
@@ -9,7 +9,7 @@ export default function CreatePostPage() {
                 Completa el formulario para generar y publicar tu contenido.
             </p>
         </div>
-      <CreatePostForm />
+      <CreatePostFormClient />
     </div>
   );
 }

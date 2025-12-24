@@ -22,7 +22,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body antialiased min-h-screen bg-background" suppressHydrationWarning>
+      <body className="font-body antialiased min-h-screen bg-background">
         {children}
         <Toaster />
       </body>
