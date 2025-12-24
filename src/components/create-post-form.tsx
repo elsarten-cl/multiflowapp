@@ -78,6 +78,7 @@ export function CreatePostForm() {
   const descripcionProductoRef = useRef<HTMLTextAreaElement>(null);
   
   const allRefs = [ofertaDeValorRef, problemaSolucionRef, historiaContextoRef, conexionTerritorialRef, textoBaseRef, descripcionProductoRef];
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     const unifiedText = [
@@ -192,7 +193,7 @@ export function CreatePostForm() {
 
   return (
     <Form {...form}>
-      <form action={publishFormAction} className="space-y-8">
+      <form ref={formRef} action={publishFormAction} className="space-y-8">
         <Card>
           <CardHeader>
             <CardTitle>1. Generación de Idea</CardTitle>
@@ -273,7 +274,7 @@ export function CreatePostForm() {
                                 <FormControl>
                                     <Input placeholder="Ej: Crema Hidratante Pro" {...field} />
                                 </FormControl>
-                                <FormMessage>{form.formState.errors.nombreProducto?.message}</FormMessage>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
@@ -286,7 +287,7 @@ export function CreatePostForm() {
                                 <FormControl>
                                     <Input placeholder="Ej: $24.990" {...field} />
                                 </FormControl>
-                                <FormMessage>{form.formState.errors.precio?.message}</FormMessage>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
@@ -311,7 +312,7 @@ export function CreatePostForm() {
                                         }}
                                     />
                                 </FormControl>
-                                <FormMessage>{form.formState.errors.descripcionProducto?.message}</FormMessage>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
@@ -319,7 +320,7 @@ export function CreatePostForm() {
             )}
           </CardContent>
           <CardFooter>
-            <Button type="button" onClick={() => draftFormAction(new FormData(form.control.ownerDocument.forms[0]))} disabled={isDraftPending}>
+            <Button type="button" onClick={() => formRef.current && draftFormAction(new FormData(formRef.current))} disabled={isDraftPending}>
               {isDraftPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Generar Borrador
             </Button>
@@ -344,7 +345,7 @@ export function CreatePostForm() {
                     <Input placeholder="Ej: Nueva Crema Hidratante para una Piel Radiante" {...field} />
                   </FormControl>
                   <FormDescription>Un título atractivo para tu publicación.</FormDescription>
-                  <FormMessage />
+                  <FormMessage>{form.formState.errors.tituloPublicacion?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -370,7 +371,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage>{form.formState.errors.ofertaDeValor?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -396,7 +397,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage>{form.formState.errors.problemaSolucion?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -525,13 +526,13 @@ export function CreatePostForm() {
                                 }}
                             />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage>{form.formState.errors.textoBase?.message}</FormMessage>
                         </FormItem>
                     )}
                     />
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
-                     <Button type="button" variant="outline" className="w-full" onClick={() => contentFormAction(new FormData(form.control.ownerDocument.forms[0]))} disabled={isContentPending}>
+                     <Button type="button" variant="outline" className="w-full" onClick={() => formRef.current && contentFormAction(new FormData(formRef.current))} disabled={isContentPending}>
                         {isContentPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                         Optimizar Texto y Generar Vistas Previas
                     </Button>
