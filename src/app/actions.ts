@@ -113,6 +113,9 @@ export async function publishAction(prevState: FormState, formData: FormData): P
     status: 'borrador',
     createdAt: now,
     updatedAt: now,
+    nombreProducto: data.nombreProducto,
+    precio: data.precio,
+    descripcionProducto: data.descripcionProducto,
   };
 
   try {

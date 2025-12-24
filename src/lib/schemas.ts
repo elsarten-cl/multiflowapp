@@ -26,6 +26,27 @@ export const CreatePostSchema = z.object({
   ctaSugerido: z.string().optional(),
   textoBase: z.string().min(1, { message: 'El texto base no puede estar vacío.'}),
   imageUrl: z.string().optional().or(z.literal('')),
+  // Campos de producto opcionales
+  nombreProducto: z.string().optional(),
+  precio: z.string().optional(),
+  descripcionProducto: z.string().optional(),
+}).superRefine((data, ctx) => {
+    if (data.postType === 'producto') {
+        if (!data.nombreProducto) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['nombreProducto'],
+                message: 'El nombre del producto es requerido.',
+            });
+        }
+        if (!data.precio) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['precio'],
+                message: 'El precio es requerido.',
+            });
+        }
+    }
 });
 
 export type CreatePostInput = z.infer<typeof CreatePostSchema>;

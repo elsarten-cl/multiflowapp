@@ -51,6 +51,9 @@ export function CreatePostForm() {
       ctaSugerido: '',
       textoBase: '',
       imageUrl: '',
+      nombreProducto: '',
+      precio: '',
+      descripcionProducto: '',
     },
   });
 
@@ -63,6 +66,8 @@ export function CreatePostForm() {
   const ctaSugerido = useWatch({ control, name: 'ctaSugerido' });
   const imageUrl = useWatch({ control, name: 'imageUrl' });
   const textoBaseValue = useWatch({ control, name: 'textoBase' });
+  const postType = useWatch({ control, name: 'postType' });
+
 
   const textoBaseRef = useRef<HTMLTextAreaElement>(null);
   const ofertaDeValorRef = useRef<HTMLTextAreaElement>(null);
@@ -250,38 +255,6 @@ export function CreatePostForm() {
                 </FormItem>
               )}
             />
-          </CardContent>
-          <CardFooter>
-            <Button type="button" onClick={handleGenerateDraft} disabled={isDraftPending}>
-              {isDraftPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-              Generar Borrador
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>2. Contenido Principal</CardTitle>
-            <CardDescription>
-              Define los elementos clave de tu publicación. Puedes editarlos manualmente o generarlos con IA.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <FormField
-              control={form.control}
-              name="tituloInterno"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Título Interno</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ej: Campaña Verano 2024 - Post 1" {...field} />
-                  </FormControl>
-                  <FormDescription>Un nombre para identificar esta publicación internamente.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
             <FormField
               control={control}
               name="postType"
@@ -317,7 +290,89 @@ export function CreatePostForm() {
                 </FormItem>
               )}
             />
+          </CardContent>
+          <CardFooter>
+            <Button type="button" onClick={handleGenerateDraft} disabled={isDraftPending}>
+              {isDraftPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              Generar Borrador
+            </Button>
+          </CardFooter>
+        </Card>
 
+        <Card>
+          <CardHeader>
+            <CardTitle>2. Contenido Principal</CardTitle>
+            <CardDescription>
+              Define los elementos clave de tu publicación. Puedes editarlos manualmente o generarlos con IA.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <FormField
+              control={form.control}
+              name="tituloInterno"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Título Interno</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ej: Campaña Verano 2024 - Post 1" {...field} />
+                  </FormControl>
+                  <FormDescription>Un nombre para identificar esta publicación internamente.</FormDescription>
+                  <FormMessage>{formState.errors.tituloInterno?.message}</FormMessage>
+                </FormItem>
+              )}
+            />
+            
+            {postType === 'producto' && (
+                <>
+                    <FormField
+                        control={form.control}
+                        name="nombreProducto"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Nombre del Producto</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Ej: Crema Hidratante Pro" {...field} />
+                                </FormControl>
+                                <FormMessage>{formState.errors.nombreProducto?.message}</FormMessage>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="precio"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Precio</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Ej: 29.99" {...field} />
+                                </FormControl>
+                                <FormMessage>{formState.errors.precio?.message}</FormMessage>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="descripcionProducto"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Descripción del Producto</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                        placeholder="Describe brevemente el producto."
+                                        className="resize-none overflow-hidden"
+                                        {...field}
+                                        onInput={(e) => {
+                                            field.onChange(e);
+                                            autoResizeTextarea(e.currentTarget);
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormMessage>{formState.errors.descripcionProducto?.message}</FormMessage>
+                            </FormItem>
+                        )}
+                    />
+                </>
+            )}
 
             <FormField
               control={form.control}
