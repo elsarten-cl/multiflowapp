@@ -35,7 +35,7 @@ export function CreatePostForm() {
   const [isContentPending, startContentTransition] = useTransition();
   const [isPreviewPending, startPreviewTransition] = useTransition();
 
-  const [previews, setPreviews] = useState({ facebook: '', instagram: '', wordpress: '' });
+  const [previews, setPreviews] = useState({ facebook: '', instagram: '' });
   
   const form = useForm<CreatePostInput>({
     resolver: zodResolver(CreatePostSchema),
@@ -108,7 +108,7 @@ export function CreatePostForm() {
                 description: publishState.message,
             });
             form.reset();
-            setPreviews({ facebook: '', instagram: '', wordpress: '' });
+            setPreviews({ facebook: '', instagram: '' });
         } else if (!publishState.errors) { 
             toast({
                 title: 'Error',
@@ -552,7 +552,7 @@ export function CreatePostForm() {
                 </CardFooter>
             </Card>
 
-            {(previews.facebook || previews.instagram || previews.wordpress || isContentPending) && (
+            {(previews.facebook || previews.instagram || isContentPending) && (
               <Card>
                 <CardHeader>
                   <CardTitle>3. Vistas Previas</CardTitle>
@@ -562,10 +562,9 @@ export function CreatePostForm() {
                 </CardHeader>
                 <CardContent>
                   <Tabs defaultValue="facebook">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="facebook"><Facebook className="mr-2"/>Facebook</TabsTrigger>
                       <TabsTrigger value="instagram"><Instagram className="mr-2"/>Instagram</TabsTrigger>
-                      <TabsTrigger value="wordpress"><Globe className="mr-2"/>WordPress</TabsTrigger>
                     </TabsList>
                     <div className="mt-4 p-4 border rounded-md min-h-[200px] bg-background">
                         {isContentPending ? (
@@ -581,9 +580,6 @@ export function CreatePostForm() {
                                 </TabsContent>
                                 <TabsContent value="instagram">
                                     <p className="whitespace-pre-wrap">{previews.instagram}</p>
-                                </TabsContent>
-                                <TabsContent value="wordpress">
-                                    <p className="whitespace-pre-wrap">{previews.wordpress}</p>
                                 </TabsContent>
                             </>
                         )}

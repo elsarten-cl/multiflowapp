@@ -70,7 +70,7 @@ export async function generatePreviewAction(prevState: FormState, formData: Form
     }
 
     try {
-        const platforms: z.infer<typeof PlatformEnum>[] = ['facebook', 'instagram', 'wordpress'];
+        const platforms: z.infer<typeof PlatformEnum>[] = ['facebook', 'instagram'];
         const previews = await Promise.all(
             platforms.map(platform => 
                 generateContentInSelectedTone({ textInput, selectedTone: toneResult.data, platform })
@@ -80,7 +80,6 @@ export async function generatePreviewAction(prevState: FormState, formData: Form
         const previewData = {
             facebook: previews[0].content,
             instagram: previews[1].content,
-            wordpress: previews[2].content,
         };
 
         return { success: true, message: 'Vistas previas generadas.', data: previewData };
