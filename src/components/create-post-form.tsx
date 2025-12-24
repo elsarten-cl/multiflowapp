@@ -42,7 +42,7 @@ export function CreatePostForm() {
     defaultValues: {
       idea: '',
       tono: 'Persuasivo',
-      tituloInterno: '',
+      tituloPublicacion: '',
       postType: 'articulo',
       ofertaDeValor: '',
       problemaSolucion: '',
@@ -109,20 +109,13 @@ export function CreatePostForm() {
             });
             form.reset();
             setPreviews({ facebook: '', instagram: '', wordpress: '' });
-        } else if (!publishState.errors) { // Show toast for general errors, not validation errors
+        } else if (!publishState.errors) { 
             toast({
                 title: 'Error',
                 description: publishState.message,
                 variant: 'destructive',
             });
         }
-    }
-    if (publishState.errors) {
-        toast({
-            title: 'Error de Validación',
-            description: 'Por favor, corrige los errores en el formulario.',
-            variant: 'destructive',
-        });
     }
   }, [publishState, toast, form]);
 
@@ -136,8 +129,9 @@ export function CreatePostForm() {
       const result = await generateDraftAction(initialFormState, formData);
       if (result.success && result.data?.draft) {
         const draft = result.data.draft;
-        const fields = ['Oferta de valor', 'Problema / solución', 'Historia / contexto', 'Conexión territorial', 'CTA sugerido'];
+        const fields = ['Título de la publicación', 'Oferta de valor', 'Problema / solución', 'Historia / contexto', 'Conexión territorial', 'CTA sugerido'];
         const fieldMap: Record<string, keyof CreatePostInput> = {
+          'Título de la publicación': 'tituloPublicacion',
           'Oferta de valor': 'ofertaDeValor',
           'Problema / solución': 'problemaSolucion',
           'Historia / contexto': 'historiaContexto',
@@ -171,7 +165,6 @@ export function CreatePostForm() {
       formData.append('textoBase', form.getValues('textoBase'));
       formData.append('tono', form.getValues('tono'));
 
-      // Run both actions
       const contentPromise = generateContentAction(initialFormState, formData);
       const previewPromise = generatePreviewAction(initialFormState, formData);
       
@@ -294,7 +287,7 @@ export function CreatePostForm() {
                                 <FormControl>
                                     <Input placeholder="Ej: Crema Hidratante Pro" {...field} />
                                 </FormControl>
-                                <FormMessage>{publishState.errors?.nombreProducto?.[0] || formState.errors.nombreProducto?.message}</FormMessage>
+                                <FormMessage>{form.formState.errors.nombreProducto?.message}</FormMessage>
                             </FormItem>
                         )}
                     />
@@ -307,7 +300,7 @@ export function CreatePostForm() {
                                 <FormControl>
                                     <Input placeholder="Ej: $24.990" {...field} />
                                 </FormControl>
-                                <FormMessage>{publishState.errors?.precio?.[0] || formState.errors.precio?.message}</FormMessage>
+                                <FormMessage>{form.formState.errors.precio?.message}</FormMessage>
                             </FormItem>
                         )}
                     />
@@ -332,7 +325,7 @@ export function CreatePostForm() {
                                         }}
                                     />
                                 </FormControl>
-                                <FormMessage>{publishState.errors?.descripcionProducto?.[0] || formState.errors.descripcionProducto?.message}</FormMessage>
+                                <FormMessage>{form.formState.errors.descripcionProducto?.message}</FormMessage>
                             </FormItem>
                         )}
                     />
@@ -351,21 +344,21 @@ export function CreatePostForm() {
           <CardHeader>
             <CardTitle>2. Contenido Principal</CardTitle>
             <CardDescription>
-              Define los elementos clave de tu publicación. Puedes editarlos manually o generarlos con IA.
+              Define los elementos clave de tu publicación. Puedes editarlos manualmente o generarlos con IA.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <FormField
               control={form.control}
-              name="tituloInterno"
+              name="tituloPublicacion"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Título Interno</FormLabel>
+                  <FormLabel>Título de la Publicación</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: Campaña Verano 2024 - Post 1" {...field} />
+                    <Input placeholder="Ej: Nueva Crema Hidratante para una Piel Radiante" {...field} />
                   </FormControl>
-                  <FormDescription>Un nombre para identificar esta publicación internamente.</FormDescription>
-                  <FormMessage>{publishState.errors?.tituloInterno?.[0] || formState.errors.tituloInterno?.message}</FormMessage>
+                  <FormDescription>Un título atractivo para tu publicación.</FormDescription>
+                  <FormMessage>{form.formState.errors.tituloPublicacion?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -391,7 +384,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{publishState.errors?.ofertaDeValor?.[0] || formState.errors.ofertaDeValor?.message}</FormMessage>
+                  <FormMessage>{form.formState.errors.ofertaDeValor?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -417,7 +410,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{publishState.errors?.problemaSolucion?.[0] || formState.errors.problemaSolucion?.message}</FormMessage>
+                  <FormMessage>{form.formState.errors.problemaSolucion?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -443,7 +436,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{publishState.errors?.historiaContexto?.[0] || formState.errors.historiaContexto?.message}</FormMessage>
+                  <FormMessage>{form.formState.errors.historiaContexto?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -469,7 +462,7 @@ export function CreatePostForm() {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>{publishState.errors?.conexionTerritorial?.[0] || formState.errors.conexionTerritorial?.message}</FormMessage>
+                  <FormMessage>{form.formState.errors.conexionTerritorial?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -483,7 +476,7 @@ export function CreatePostForm() {
                   <FormControl>
                     <Input placeholder="Ej: ¡Compra ahora!, Más información aquí" {...field} />
                   </FormControl>
-                  <FormMessage>{publishState.errors?.ctaSugerido?.[0] || formState.errors.ctaSugerido?.message}</FormMessage>
+                  <FormMessage>{form.formState.errors.ctaSugerido?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -546,7 +539,7 @@ export function CreatePostForm() {
                                 }}
                             />
                         </FormControl>
-                        <FormMessage>{publishState.errors?.textoBase?.[0] || formState.errors.textoBase?.message}</FormMessage>
+                        <FormMessage>{form.formState.errors.textoBase?.message}</FormMessage>
                         </FormItem>
                     )}
                     />
@@ -612,5 +605,3 @@ export function CreatePostForm() {
     </Form>
   );
 }
-
-    

@@ -35,7 +35,7 @@ const GenerateContentDraftOutputSchema = z.object({
   draft: z
     .string()
     .describe(
-      'A structured draft with "Oferta de valor", "Problema / solución", "Historia / contexto", "Conexión territorial", and "CTA sugerido" fields, optimized for the selected tone. The output should be formatted as "Field: [content]\\n...".'
+      'A structured draft with "Título de la publicación", "Oferta de valor", "Problema / solución", "Historia / contexto", "Conexión territorial", and "CTA sugerido" fields, optimized for the selected tone. The output should be formatted as "Field: [content]\\n...".'
     ),
 });
 export type GenerateContentDraftOutput = z.infer<typeof GenerateContentDraftOutputSchema>;
@@ -56,9 +56,10 @@ Idea: {{{idea}}}
 Tone: {{{selectedTone}}}
 Post Type: {{{postType}}}
 
-The draft should include the following sections: "Oferta de valor", "Problema / solución", "Historia / contexto", "Conexión territorial", and "CTA sugerido". 
+The draft should include the following sections: "Título de la publicación", "Oferta de valor", "Problema / solución", "Historia / contexto", "Conexión territorial", and "CTA sugerido". 
 If the Post Type is 'producto', make sure the content is oriented towards selling a product.
 The output MUST be a string formatted exactly like this, with each field on a new line:
+Título de la publicación: [content]
 Oferta de valor: [content]
 Problema / solución: [content]
 Historia / contexto: [content]

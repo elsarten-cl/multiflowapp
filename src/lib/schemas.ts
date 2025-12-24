@@ -19,7 +19,7 @@ export const PlatformEnum = z.enum(['facebook', 'instagram', 'wordpress']);
 export const CreatePostSchema = z.object({
   idea: z.string().optional(),
   tono: ToneEnum,
-  tituloInterno: z.string().min(1, { message: 'El título interno es requerido.'}),
+  tituloPublicacion: z.string().min(1, { message: 'El título de la publicación es requerido.'}),
   postType: PostTypeEnum,
   ofertaDeValor: z.string().min(1, { message: 'La oferta de valor es requerida.'}),
   problemaSolucion: z.string().min(1, { message: 'El campo problema/solución es requerido.'}),

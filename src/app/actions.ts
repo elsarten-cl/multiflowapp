@@ -107,7 +107,7 @@ export async function publishAction(prevState: FormState, formData: FormData): P
   const now = Timestamp.now();
   
   const postData = {
-    tituloInterno: data.tituloInterno,
+    tituloPublicacion: data.tituloPublicacion,
     textoBase: data.textoBase,
     tono: data.tono,
     imageUrl: data.imageUrl,
@@ -125,7 +125,7 @@ export async function publishAction(prevState: FormState, formData: FormData): P
     const db = getFirestore();
     const docRef = await db.collection('posts').add(postData);
 
-    let message = `Borrador "${data.tituloInterno}" guardado con éxito.`;
+    let message = `Borrador "${data.tituloPublicacion}" guardado con éxito.`;
 
     const webhookUrl = process.env.MAKE_WEBHOOK_URL;
     if (!webhookUrl) {
@@ -142,7 +142,7 @@ export async function publishAction(prevState: FormState, formData: FormData): P
 
     if (response.ok) {
       await docRef.update({ status: 'publicado', updatedAt: Timestamp.now() });
-      message = `Publicación "${data.tituloInterno}" enviada con éxito.`;
+      message = `Publicación "${data.tituloPublicacion}" enviada con éxito.`;
     } else {
       await docRef.update({ status: 'error', updatedAt: Timestamp.now() });
       throw new Error(`Webhook falló con estado: ${response.status}`);
