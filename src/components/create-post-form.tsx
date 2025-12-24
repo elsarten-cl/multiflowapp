@@ -23,7 +23,13 @@ export function CreatePostForm() {
   const { toast } = useToast();
   const [isDraftPending, startDraftTransition] = useTransition();
   const [isContentPending, startContentTransition] = useTransition();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  const ofertaDeValorRef = useRef<HTMLTextAreaElement>(null);
+  const problemaSolucionRef = useRef<HTMLTextAreaElement>(null);
+  const historiaContextoRef = useRef<HTMLTextAreaElement>(null);
+  const conexionTerritorialRef = useRef<HTMLTextAreaElement>(null);
+  const textoBaseRef = useRef<HTMLTextAreaElement>(null);
+
 
   const form = useForm<CreatePostInput>({
     resolver: zodResolver(CreatePostSchema),
@@ -62,12 +68,18 @@ export function CreatePostForm() {
     setValue('textoBase', unifiedText, { shouldValidate: true, shouldDirty: true });
   }, [ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, ctaSugerido, setValue]);
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+  const autoResizeTextarea = (ref: React.RefObject<HTMLTextAreaElement>) => {
+    if (ref.current) {
+        ref.current.style.height = 'auto';
+        ref.current.style.height = `${ref.current.scrollHeight}px`;
     }
-  }, [textoBase]);
+  };
+
+  useEffect(() => autoResizeTextarea(textoBaseRef), [textoBase]);
+  useEffect(() => autoResizeTextarea(ofertaDeValorRef), [ofertaDeValor]);
+  useEffect(() => autoResizeTextarea(problemaSolucionRef), [problemaSolucion]);
+  useEffect(() => autoResizeTextarea(historiaContextoRef), [historiaContexto]);
+  useEffect(() => autoResizeTextarea(conexionTerritorialRef), [conexionTerritorial]);
 
   const [publishState, publishFormAction] = useActionState(publishAction, initialFormState);
 
@@ -234,7 +246,11 @@ export function CreatePostForm() {
                 <FormItem>
                   <FormLabel>Oferta de valor</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Describe la oferta de valor principal." {...field} />
+                    <Textarea 
+                      ref={ofertaDeValorRef} 
+                      placeholder="Describe la oferta de valor principal." 
+                      className="resize-none overflow-hidden" 
+                      {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -248,7 +264,11 @@ export function CreatePostForm() {
                 <FormItem>
                   <FormLabel>Problema / solución</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Explica el problema que resuelves y cómo." className="min-h-[150px]" {...field} />
+                    <Textarea 
+                      ref={problemaSolucionRef} 
+                      placeholder="Explica el problema que resuelves y cómo." 
+                      className="resize-none overflow-hidden" 
+                      {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -262,7 +282,11 @@ export function CreatePostForm() {
                 <FormItem>
                   <FormLabel>Historia / contexto</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Aporta contexto o una historia relevante." {...field} />
+                    <Textarea 
+                      ref={historiaContextoRef} 
+                      placeholder="Aporta contexto o una historia relevante." 
+                      className="resize-none overflow-hidden" 
+                      {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -276,7 +300,11 @@ export function CreatePostForm() {
                 <FormItem>
                   <FormLabel>Conexión territorial</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Crea una conexión con la audiencia local o territorial." {...field} />
+                    <Textarea 
+                      ref={conexionTerritorialRef} 
+                      placeholder="Crea una conexión con la audiencia local o territorial." 
+                      className="resize-none overflow-hidden" 
+                      {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -343,7 +371,7 @@ export function CreatePostForm() {
                         <FormItem>
                         <FormControl>
                             <Textarea 
-                                ref={textareaRef}
+                                ref={textoBaseRef}
                                 readOnly 
                                 className="resize-none bg-background overflow-hidden" 
                                 {...field} 
