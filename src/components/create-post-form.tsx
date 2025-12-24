@@ -19,7 +19,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from './ui/skeleton';
 
-const initialFormState = { message: '', errors: {}, success: false, data: undefined };
+const initialFormState = { message: '', errors: undefined, success: false, data: undefined };
 
 const autoResizeTextarea = (element: HTMLTextAreaElement | null) => {
     if (element) {
@@ -55,7 +55,7 @@ export function CreatePostForm() {
       precio: '',
       descripcionProducto: '',
     },
-    context: publishState, 
+    context: publishState,
   });
 
   const { control, setValue, getValues, formState: { errors } } = form;
@@ -84,13 +84,11 @@ export function CreatePostForm() {
         form.reset();
         setPreviews({ facebook: '', instagram: '' });
       } else {
-        if (typeof publishState.errors !== 'object') {
-           toast({
-                title: 'Error',
-                description: publishState.message,
-                variant: 'destructive',
-            });
-        }
+         toast({
+              title: 'Error',
+              description: publishState.message,
+              variant: 'destructive',
+          });
       }
     }
   }, [publishState, toast, form]);
@@ -190,7 +188,7 @@ export function CreatePostForm() {
 
   return (
     <Form {...form}>
-      <form ref={formRef} onSubmit={form.handleSubmit(handlePublishAction)} className="space-y-8">
+      <form ref={formRef} className="space-y-8">
         <Card>
           <CardHeader>
             <CardTitle>1. Generación de Idea</CardTitle>
@@ -576,7 +574,7 @@ export function CreatePostForm() {
 
           </CardContent>
           <CardFooter>
-            <Button type="submit" size="lg" disabled={isPublishPending}>
+            <Button type="submit" size="lg" formAction={handlePublishAction} disabled={isPublishPending}>
               {isPublishPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
               Guardar y Enviar
             </Button>
