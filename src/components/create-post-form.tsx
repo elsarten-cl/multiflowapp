@@ -19,7 +19,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from './ui/skeleton';
 
-const initialFormState = { message: '', errors: {}, success: false };
+const initialFormState = { message: '', errors: {}, success: false, data: undefined };
 
 const autoResizeTextarea = (element: HTMLTextAreaElement | null) => {
     if (element) {
@@ -60,13 +60,7 @@ export function CreatePostForm() {
 
   const { control, setValue, getValues } = form;
 
-  const ofertaDeValor = useWatch({ control, name: 'ofertaDeValor' });
-  const problemaSolucion = useWatch({ control, name: 'problemaSolucion' });
-  const historiaContexto = useWatch({ control, name: 'historiaContexto' });
-  const conexionTerritorial = useWatch({ control, name: 'conexionTerritorial' });
-  const ctaSugerido = useWatch({ control, name: 'ctaSugerido' });
   const imageUrl = useWatch({ control, name: 'imageUrl' });
-  const textoBaseValue = useWatch({ control, name: 'textoBase' });
   const postType = useWatch({ control, name: 'postType' });
 
 
@@ -79,25 +73,29 @@ export function CreatePostForm() {
   
   const allRefs = [ofertaDeValorRef, problemaSolucionRef, historiaContextoRef, conexionTerritorialRef, textoBaseRef, descripcionProductoRef];
   const formRef = useRef<HTMLFormElement>(null);
+  
+  // This useEffect was causing the infinite loop.
+  // It's better to compose the text right before the action call.
+  // useEffect(() => {
+  //   const unifiedText = [
+  //     ofertaDeValor,
+  //     problemaSolucion,
+  //     historiaContexto,
+  //     conexionTerritorial,
+  //     ctaSugerido
+  //   ].filter(Boolean).join('\n\n');
+  //   if (getValues('textoBase') !== unifiedText) {
+  //       setValue('textoBase', unifiedText, { shouldValidate: true, shouldDirty: true });
+  //   }
+  // }, [ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, ctaSugerido, setValue, getValues]);
 
-  useEffect(() => {
-    const unifiedText = [
-      ofertaDeValor,
-      problemaSolucion,
-      historiaContexto,
-      conexionTerritorial,
-      ctaSugerido
-    ].filter(Boolean).join('\n\n');
-    if (getValues('textoBase') !== unifiedText) {
-        setValue('textoBase', unifiedText, { shouldValidate: true, shouldDirty: true });
-    }
-  }, [ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, ctaSugerido, setValue, getValues]);
-
-  useEffect(() => {
-    requestAnimationFrame(() => {
-      allRefs.forEach(ref => autoResizeTextarea(ref.current));
-    });
-  }, [textoBaseValue, ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, form.watch('descripcionProducto')]);
+  // This useEffect was also contributing to the re-render loop.
+  // We can call autoResizeTextarea onInput instead.
+  // useEffect(() => {
+  //   requestAnimationFrame(() => {
+  //     allRefs.forEach(ref => autoResizeTextarea(ref.current));
+  //   });
+  // }, [textoBaseValue, ofertaDeValor, problemaSolucion, historiaContexto, conexionTerritorial, form.watch('descripcionProducto')]);
 
 
   useEffect(() => {
@@ -110,8 +108,6 @@ export function CreatePostForm() {
         form.reset();
         setPreviews({ facebook: '', instagram: '' });
       } else {
-        // Don't show toast for validation errors, they are shown in the form.
-        // Show only for other kinds of errors
         if (typeof publishState.errors !== 'object') {
            toast({
                 title: 'Error',
@@ -160,6 +156,9 @@ export function CreatePostForm() {
       if (contentState.data.optimizedContent) {
         setValue('textoBase', contentState.data.optimizedContent, { shouldValidate: true, shouldDirty: true });
         toast({ title: 'Contenido optimizado', description: 'El texto unificado ha sido actualizado.' });
+        requestAnimationFrame(() => {
+          autoResizeTextarea(textoBaseRef.current);
+        });
       }
       if (contentState.data.previews) {
         setPreviews(contentState.data.previews);
@@ -184,10 +183,49 @@ export function CreatePostForm() {
     }
   };
 
+  const handleContentAction = () => {
+    const values = getValues();
+    const unifiedText = [
+      values.ofertaDeValor,
+      values.problemaSolucion,
+      values.historiaContexto,
+      values.conexionTerritorial,
+      values.ctaSugerido
+    ].filter(Boolean).join('\n\n');
+    
+    // Set the unified text into textoBase before submitting
+    setValue('textoBase', unifiedText, { shouldValidate: true, shouldDirty: true });
+
+    // Manually create FormData and trigger the action
+    if (formRef.current) {
+      // We must update the textarea value manually before creating FormData
+      const textoBaseTextarea = formRef.current.querySelector('textarea[name="textoBase"]') as HTMLTextAreaElement;
+      if (textoBaseTextarea) {
+        textoBaseTextarea.value = unifiedText;
+      }
+      const formData = new FormData(formRef.current);
+      contentFormAction(formData);
+    }
+  };
+
+  const handlePublishAction = (formData: FormData) => {
+    const values = getValues();
+    const unifiedText = [
+      values.ofertaDeValor,
+      values.problemaSolucion,
+      values.historiaContexto,
+      values.conexionTerritorial,
+      values.ctaSugerido
+    ].filter(Boolean).join('\n\n');
+    
+    formData.set('textoBase', unifiedText);
+    publishFormAction(formData);
+  };
+
 
   return (
     <Form {...form}>
-      <form ref={formRef} action={publishFormAction} className="space-y-8">
+      <form ref={formRef} action={handlePublishAction} className="space-y-8">
         <Card>
           <CardHeader>
             <CardTitle>1. Generación de Idea</CardTitle>
@@ -268,7 +306,7 @@ export function CreatePostForm() {
                                 <FormControl>
                                     <Input placeholder="Ej: Crema Hidratante Pro" {...field} />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage>{form.formState.errors.nombreProducto?.message}</FormMessage>
                             </FormItem>
                         )}
                     />
@@ -281,7 +319,7 @@ export function CreatePostForm() {
                                 <FormControl>
                                     <Input placeholder="Ej: $24.990" {...field} />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage>{form.formState.errors.precio?.message}</FormMessage>
                             </FormItem>
                         )}
                     />
@@ -526,7 +564,7 @@ export function CreatePostForm() {
                     />
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
-                     <Button type="submit" variant="outline" className="w-full" formAction={contentFormAction} disabled={isContentPending}>
+                     <Button type="button" variant="outline" className="w-full" onClick={handleContentAction} disabled={isContentPending}>
                         {isContentPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                         Optimizar Texto y Generar Vistas Previas
                     </Button>
@@ -582,3 +620,5 @@ export function CreatePostForm() {
     </Form>
   );
 }
+
+    
