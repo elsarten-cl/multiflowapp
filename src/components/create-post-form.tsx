@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Sparkles, Send, Upload, Facebook, Instagram } from 'lucide-react';
 import Image from 'next/image';
 
-import { CreatePostSchema, TONES, PostTypeEnum, type CreatePostInput } from '@/lib/schemas';
+import { CreatePostSchema, TONES, type CreatePostInput } from '@/lib/schemas';
 import { generateDraftAction, generateContentAndPreviewsAction, publishAction } from '@/app/actions';
 
 import { useToast } from '@/hooks/use-toast';
@@ -110,22 +110,16 @@ export function CreatePostForm() {
         form.reset();
         setPreviews({ facebook: '', instagram: '' });
       } else {
-        toast({
-          title: 'Error',
-          description: publishState.message,
-          variant: 'destructive',
-        });
+        // Don't show toast for validation errors, they are shown in the form.
+        // Show only for other kinds of errors
+        if (typeof publishState.errors !== 'object') {
+           toast({
+                title: 'Error',
+                description: publishState.message,
+                variant: 'destructive',
+            });
+        }
       }
-    }
-    if (publishState.errors) {
-        Object.entries(publishState.errors).forEach(([field, errors]) => {
-            if (errors) {
-                 form.setError(field as keyof CreatePostInput, {
-                    type: 'manual',
-                    message: errors.join(', '),
-                });
-            }
-        });
     }
   }, [publishState, toast, form]);
 
