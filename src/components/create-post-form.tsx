@@ -261,35 +261,22 @@ export function CreatePostForm() {
               )}
             />
             <FormField
-              control={control}
+              control={form.control}
               name="postType"
               render={({ field }) => (
-                <FormItem className="space-y-3">
+                <FormItem>
                   <FormLabel>Tipo de Publicación</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-col space-y-1"
-                    >
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="articulo" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Artículo / Contenido
-                        </FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="producto" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Producto / Venta
-                        </FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="articulo">Artículo / Contenido</SelectItem>
+                      <SelectItem value="producto">Producto / Venta</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormDescription>Selecciona a qué categoría pertenece tu contenido.</FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -625,3 +612,5 @@ export function CreatePostForm() {
     </Form>
   );
 }
+
+    
