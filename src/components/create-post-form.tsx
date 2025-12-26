@@ -162,6 +162,12 @@ export function CreatePostForm() {
     }
   };
 
+  const onGenerateDraft = () => {
+      if (formRef.current) {
+          draftFormAction(new FormData(formRef.current));
+      }
+  };
+
   return (
     <Form {...form}>
       <form ref={formRef} action={publishFormAction} className="space-y-8">
@@ -291,7 +297,7 @@ export function CreatePostForm() {
             )}
           </CardContent>
           <CardFooter>
-            <Button type="submit" formAction={draftFormAction} disabled={isDraftPending}>
+            <Button type="button" onClick={form.handleSubmit(onGenerateDraft)} disabled={isDraftPending}>
               {isDraftPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Generar Borrador
             </Button>
@@ -565,5 +571,3 @@ export function CreatePostForm() {
     </Form>
   );
 }
-
-    
