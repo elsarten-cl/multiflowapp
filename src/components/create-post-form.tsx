@@ -33,6 +33,7 @@ export function CreatePostForm() {
   const formRef = useRef<HTMLFormElement>(null);
   
   const [previews, setPreviews] = useState({ facebook: '', instagram: '' });
+  const [_isPending, startTransition] = useTransition();
   
   const form = useForm<CreatePostInput>({
     resolver: zodResolver(CreatePostSchema),
@@ -61,8 +62,6 @@ export function CreatePostForm() {
   const [contentState, contentFormAction, isContentPending] = useActionState(generateContentAndPreviewsAction, initialFormState);
   const [publishState, publishFormAction, isPublishPending] = useActionState(publishAction, initialFormState);
   
-  const [_isPending, startTransition] = useTransition();
-
   const onGenerateDraft = async () => {
     const isValid = await trigger(["idea", "tono", "postType"]);
     if (isValid) {
