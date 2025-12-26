@@ -163,9 +163,9 @@ export function CreatePostForm() {
   };
 
   const onGenerateDraft = () => {
-      if (formRef.current) {
-          draftFormAction(new FormData(formRef.current));
-      }
+    if (formRef.current) {
+        draftFormAction(new FormData(formRef.current));
+    }
   };
 
   return (
