@@ -78,6 +78,30 @@ export function CreatePostForm() {
     }
   };
 
+  const onGenerateContent = async () => {
+    const fieldsToValidate: (keyof CreatePostInput)[] = [
+      'tono',
+      'ofertaDeValor',
+      'problemaSolucion',
+      'historiaContexto',
+      'conexionTerritorial',
+      'ctaSugerido',
+    ];
+    const isValid = await trigger(fieldsToValidate);
+    if(isValid) {
+       startTransition(() => {
+        const formData = new FormData();
+        const data = getValues();
+        Object.entries(data).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            formData.append(key, String(value));
+          }
+        });
+        contentFormAction(formData);
+      });
+    }
+  }
+
   const lastProcessedMessage = useRef<string | null>(null);
 
 
@@ -522,8 +546,8 @@ export function CreatePostForm() {
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
                      <Button
-                      type="submit"
-                      formAction={contentFormAction}
+                      type="button"
+                      onClick={onGenerateContent}
                       className="w-full"
                       disabled={isContentPending}
                     >
