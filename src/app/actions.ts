@@ -137,7 +137,7 @@ export async function publishAction(prevState: FormState, formData: FormData): P
           await docRef.update({ status: 'publicado', updatedAt: Timestamp.now() });
           message = `Publicación "${data.tituloPublicacion}" enviada con éxito.`;
         } else {
-          await docref.update({ status: 'error', updatedAt: Timestamp.now() });
+          await docRef.update({ status: 'error', updatedAt: Timestamp.now() });
           message = `Borrador guardado, pero la publicación falló (Webhook: ${response.status}).`;
         }
       } catch (fetchError) {
@@ -162,5 +162,3 @@ export async function publishAction(prevState: FormState, formData: FormData): P
     };
   }
 }
-
-    
