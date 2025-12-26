@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useActionState } from 'react';
+import { useEffect, useRef, useState, useActionState, useTransition } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Sparkles, Send, Upload, Facebook, Instagram } from 'lucide-react';
@@ -302,7 +302,7 @@ export function CreatePostForm() {
           <CardHeader>
             <CardTitle>2. Contenido Principal</CardTitle>
             <CardDescription>
-              Define los elementos clave de tu publicación. Puedes editarlos manualmente o generarlos con IA.
+              Define los elementos clave de tu publicación. Puedes editarlos manually o generarlos con IA.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -565,3 +565,5 @@ export function CreatePostForm() {
     </Form>
   );
 }
+
+    
