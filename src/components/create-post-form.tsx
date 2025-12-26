@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useActionState } from 'react';
+import { useEffect, useRef, useState, useActionState, useTransition } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Sparkles, Send, Upload, Facebook, Instagram } from 'lucide-react';
@@ -30,11 +30,8 @@ const autoResizeTextarea = (element: HTMLTextAreaElement | null) => {
 
 export function CreatePostForm() {
   const { toast } = useToast();
+  const formRef = useRef<HTMLFormElement>(null);
   
-  const [draftState, draftFormAction, isDraftPending] = useActionState(generateDraftAction, initialFormState);
-  const [contentState, contentFormAction, isContentPending] = useActionState(generateContentAndPreviewsAction, initialFormState);
-  const [publishState, publishFormAction, isPublishPending] = useActionState(publishAction, initialFormState);
-
   const [previews, setPreviews] = useState({ facebook: '', instagram: '' });
   
   const form = useForm<CreatePostInput>({
@@ -55,14 +52,17 @@ export function CreatePostForm() {
       precio: '',
       descripcionProducto: '',
     },
-    context: publishState,
   });
 
   const { control, setValue, getValues, formState: { errors } } = form;
 
+  const [draftState, draftFormAction, isDraftPending] = useActionState(generateDraftAction, initialFormState);
+  const [contentState, contentFormAction, isContentPending] = useActionState(generateContentAndPreviewsAction, initialFormState);
+  const [publishState, publishFormAction, isPublishPending] = useActionState(publishAction, initialFormState);
+
+
   const imageUrl = useWatch({ control, name: 'imageUrl' });
   const postType = useWatch({ control, name: 'postType' });
-
 
   const textoBaseRef = useRef<HTMLTextAreaElement>(null);
   const ofertaDeValorRef = useRef<HTMLTextAreaElement>(null);
@@ -72,7 +72,6 @@ export function CreatePostForm() {
   const descripcionProductoRef = useRef<HTMLTextAreaElement>(null);
   
   const allRefs = [ofertaDeValorRef, problemaSolucionRef, historiaContextoRef, conexionTerritorialRef, textoBaseRef, descripcionProductoRef];
-  const formRef = useRef<HTMLFormElement>(null);
   
   useEffect(() => {
     if (publishState.message) {
@@ -96,7 +95,6 @@ export function CreatePostForm() {
   useEffect(() => {
     if (draftState.success && draftState.data?.draft) {
       const draft = draftState.data.draft;
-      const fields = ['Título de la publicación', 'Oferta de valor', 'Problema / solución', 'Historia / contexto', 'Conexión territorial', 'CTA sugerido'];
       const fieldMap: Record<string, keyof CreatePostInput> = {
         'Título de la publicación': 'tituloPublicacion',
         'Oferta de valor': 'ofertaDeValor',
@@ -106,13 +104,12 @@ export function CreatePostForm() {
         'CTA sugerido': 'ctaSugerido',
       };
 
-      fields.forEach(field => {
-          const regex = new RegExp(`${field}:(.*?)(?=\n[A-Z]|$|\\n\\n)`, 's');
-          const match = draft.match(regex);
-          if (match) {
-              const key = fieldMap[field];
-              setValue(key, match[1].trim(), { shouldValidate: true, shouldDirty: true });
-          }
+      Object.entries(fieldMap).forEach(([fieldName, formKey]) => {
+        const regex = new RegExp(`${fieldName}:(.*?)(?=\\n[A-Z][a-zA-ZÀ-ÿ ]* /:|\\n[A-Z][a-zA-ZÀ-ÿ ]*:|$)`, 's');
+        const match = draft.match(regex);
+        if (match) {
+          setValue(formKey, match[1].trim(), { shouldValidate: true, shouldDirty: true });
+        }
       });
       
       requestAnimationFrame(() => {
@@ -159,7 +156,7 @@ export function CreatePostForm() {
 
   return (
     <Form {...form}>
-      <form ref={formRef} className="space-y-8">
+      <form ref={formRef} action={publishFormAction} className="space-y-8">
         <Card>
           <CardHeader>
             <CardTitle>1. Generación de Idea</CardTitle>
@@ -297,7 +294,7 @@ export function CreatePostForm() {
           <CardHeader>
             <CardTitle>2. Contenido Principal</CardTitle>
             <CardDescription>
-              Define los elementos clave de tu publicación. Puedes editarlos manually o generarlos con IA.
+              Define los elementos clave de tu publicación. Puedes editarlos manualmente o generarlos con IA.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -545,7 +542,7 @@ export function CreatePostForm() {
 
           </CardContent>
           <CardFooter>
-            <Button type="submit" size="lg" formAction={publishFormAction} disabled={isPublishPending}>
+            <Button type="submit" size="lg" disabled={isPublishPending}>
               {isPublishPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
               Guardar y Enviar
             </Button>
@@ -555,3 +552,5 @@ export function CreatePostForm() {
     </Form>
   );
 }
+
+    
