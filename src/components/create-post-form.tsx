@@ -63,23 +63,23 @@ export function CreatePostForm() {
   
   const [_isPending, startTransition] = useTransition();
 
-  const lastProcessedMessage = useRef<string | null>(null);
-
   const onGenerateDraft = async () => {
     const isValid = await trigger(["idea", "tono", "postType"]);
     if (isValid) {
-      const formData = new FormData();
-      const data = getValues();
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          formData.append(key, String(value));
-        }
-      });
       startTransition(() => {
+        const formData = new FormData();
+        const data = getValues();
+        Object.entries(data).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            formData.append(key, String(value));
+          }
+        });
         draftFormAction(formData);
       });
     }
   };
+
+  const lastProcessedMessage = useRef<string | null>(null);
 
 
   const imageUrl = useWatch({ control, name: 'imageUrl' });
@@ -584,5 +584,3 @@ export function CreatePostForm() {
     </Form>
   );
 }
-
-    
