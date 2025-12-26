@@ -55,7 +55,7 @@ export function CreatePostForm() {
     mode: 'onSubmit',
   });
 
-  const { control, setValue, formState: { errors } } = form;
+  const { control, setValue, getValues, trigger, formState: { errors } } = form;
 
   const [draftState, draftFormAction, isDraftPending] = useActionState(generateDraftAction, initialFormState);
   const [contentState, contentFormAction, isContentPending] = useActionState(generateContentAndPreviewsAction, initialFormState);
@@ -63,16 +63,18 @@ export function CreatePostForm() {
 
   const lastProcessedMessage = useRef<string | null>(null);
 
-  const onGenerateDraft = () => {
-    form.handleSubmit((data) => {
-        const formData = new FormData();
-        Object.entries(data).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
-                formData.append(key, value.toString());
-            }
-        });
-        draftFormAction(formData);
-    })();
+  const onGenerateDraft = async () => {
+    const isValid = await trigger(["idea", "tono", "postType"]);
+    if (isValid) {
+      const formData = new FormData();
+      const data = getValues();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+      draftFormAction(formData);
+    }
   };
 
 
