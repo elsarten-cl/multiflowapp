@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState, useActionState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useEffect, useRef, useState } from 'react';
+import { useForm, useWatch, useActionState } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Sparkles, Send, Upload, Facebook, Instagram } from 'lucide-react';
 import Image from 'next/image';
@@ -291,15 +291,7 @@ export function CreatePostForm() {
             )}
           </CardContent>
           <CardFooter>
-            <Button
-              type="button"
-              onClick={() => {
-                if (formRef.current) {
-                  draftFormAction(new FormData(formRef.current));
-                }
-              }}
-              disabled={isDraftPending}
-            >
+            <Button type="submit" formAction={draftFormAction} disabled={isDraftPending}>
               {isDraftPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Generar Borrador
             </Button>
@@ -512,12 +504,8 @@ export function CreatePostForm() {
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
                      <Button
-                      type="button"
-                      onClick={() => {
-                        if (formRef.current) {
-                          contentFormAction(new FormData(formRef.current));
-                        }
-                      }}
+                      type="submit"
+                      formAction={contentFormAction}
                       className="w-full"
                       disabled={isContentPending}
                     >
@@ -567,7 +555,7 @@ export function CreatePostForm() {
 
           </CardContent>
           <CardFooter>
-            <Button type="submit" size="lg" formAction={publishFormAction} disabled={isPublishPending}>
+            <Button type="submit" size="lg" disabled={isPublishPending}>
               {isPublishPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
               Guardar y Enviar
             </Button>
