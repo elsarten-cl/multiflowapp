@@ -60,6 +60,8 @@ export function CreatePostForm() {
   const [draftState, draftFormAction, isDraftPending] = useActionState(generateDraftAction, initialFormState);
   const [contentState, contentFormAction, isContentPending] = useActionState(generateContentAndPreviewsAction, initialFormState);
   const [publishState, publishFormAction, isPublishPending] = useActionState(publishAction, initialFormState);
+  
+  const [_isPending, startTransition] = useTransition();
 
   const lastProcessedMessage = useRef<string | null>(null);
 
@@ -73,7 +75,9 @@ export function CreatePostForm() {
           formData.append(key, String(value));
         }
       });
-      draftFormAction(formData);
+      startTransition(() => {
+        draftFormAction(formData);
+      });
     }
   };
 
@@ -580,3 +584,5 @@ export function CreatePostForm() {
     </Form>
   );
 }
+
+    
