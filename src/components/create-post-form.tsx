@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useActionState, useTransition } from 'react';
+import { useEffect, useRef, useState, useActionState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Sparkles, Send, Upload, Facebook, Instagram } from 'lucide-react';
@@ -52,14 +52,16 @@ export function CreatePostForm() {
       precio: '',
       descripcionProducto: '',
     },
+    mode: 'onSubmit',
   });
 
-  const { control, setValue, getValues, formState: { errors } } = form;
+  const { control, setValue, formState: { errors } } = form;
 
   const [draftState, draftFormAction, isDraftPending] = useActionState(generateDraftAction, initialFormState);
   const [contentState, contentFormAction, isContentPending] = useActionState(generateContentAndPreviewsAction, initialFormState);
   const [publishState, publishFormAction, isPublishPending] = useActionState(publishAction, initialFormState);
 
+  const lastProcessedMessage = useRef<string | null>(null);
 
   const imageUrl = useWatch({ control, name: 'imageUrl' });
   const postType = useWatch({ control, name: 'postType' });
@@ -74,7 +76,9 @@ export function CreatePostForm() {
   const allRefs = [ofertaDeValorRef, problemaSolucionRef, historiaContextoRef, conexionTerritorialRef, textoBaseRef, descripcionProductoRef];
   
   useEffect(() => {
-    if (publishState.message) {
+    // Evita bucles infinitos procesando cada mensaje una sola vez.
+    if (publishState.message && publishState.message !== lastProcessedMessage.current) {
+      lastProcessedMessage.current = publishState.message;
       if (publishState.success) {
         toast({
           title: 'Éxito',
@@ -93,50 +97,55 @@ export function CreatePostForm() {
   }, [publishState, toast, form]);
 
   useEffect(() => {
-    if (draftState.success && draftState.data?.draft) {
-      const draft = draftState.data.draft;
-      const fieldMap: Record<string, keyof CreatePostInput> = {
-        'Título de la publicación': 'tituloPublicacion',
-        'Oferta de valor': 'ofertaDeValor',
-        'Problema / solución': 'problemaSolucion',
-        'Historia / contexto': 'historiaContexto',
-        'Conexión territorial': 'conexionTerritorial',
-        'CTA sugerido': 'ctaSugerido',
-      };
+    if (draftState.message && draftState.message !== lastProcessedMessage.current) {
+        lastProcessedMessage.current = draftState.message;
+        if (draftState.success && draftState.data?.draft) {
+            const draft = draftState.data.draft;
+            const fieldMap: Record<string, keyof CreatePostInput> = {
+                'Título de la publicación': 'tituloPublicacion',
+                'Oferta de valor': 'ofertaDeValor',
+                'Problema / solución': 'problemaSolucion',
+                'Historia / contexto': 'historiaContexto',
+                'Conexión territorial': 'conexionTerritorial',
+                'CTA sugerido': 'ctaSugerido',
+            };
 
-      Object.entries(fieldMap).forEach(([fieldName, formKey]) => {
-        const regex = new RegExp(`${fieldName}:(.*?)(?=\\n[A-Z][a-zA-ZÀ-ÿ ]* /:|\\n[A-Z][a-zA-ZÀ-ÿ ]*:|$)`, 's');
-        const match = draft.match(regex);
-        if (match) {
-          setValue(formKey, match[1].trim(), { shouldValidate: true, shouldDirty: true });
+            Object.entries(fieldMap).forEach(([fieldName, formKey]) => {
+                const regex = new RegExp(`${fieldName}:(.*?)(?=\\n[A-Z][a-zA-ZÀ-ÿ ]* /:|\\n[A-Z][a-zA-ZÀ-ÿ ]*:|$)`, 's');
+                const match = draft.match(regex);
+                if (match) {
+                    setValue(formKey, match[1].trim(), { shouldValidate: true, shouldDirty: true });
+                }
+            });
+            
+            requestAnimationFrame(() => {
+                allRefs.forEach(ref => autoResizeTextarea(ref.current));
+            });
+
+            toast({ title: 'Borrador generado', description: 'Los campos de contenido han sido actualizados.' });
+        } else if (!draftState.success) {
+            toast({ title: 'Error', description: draftState.message, variant: 'destructive' });
         }
-      });
-      
-      requestAnimationFrame(() => {
-          allRefs.forEach(ref => autoResizeTextarea(ref.current));
-      });
-
-      toast({ title: 'Borrador generado', description: 'Los campos de contenido han sido actualizados.' });
-    } else if (draftState.message && !draftState.success) {
-      toast({ title: 'Error', description: draftState.message, variant: 'destructive' });
     }
   }, [draftState, setValue, toast, allRefs]);
 
   useEffect(() => {
-    if (contentState.success && contentState.data) {
-      if (contentState.data.optimizedContent) {
-        setValue('textoBase', contentState.data.optimizedContent, { shouldValidate: true, shouldDirty: true });
-        toast({ title: 'Contenido optimizado', description: 'El texto unificado ha sido actualizado.' });
-        requestAnimationFrame(() => {
-          autoResizeTextarea(textoBaseRef.current);
-        });
-      }
-      if (contentState.data.previews) {
-        setPreviews(contentState.data.previews);
-        toast({ title: 'Vistas previas generadas', description: 'Se generó el contenido para cada plataforma.' });
-      }
-    } else if (contentState.message && !contentState.success) {
-      toast({ title: 'Error de Contenido', description: contentState.message, variant: 'destructive' });
+    if (contentState.message && contentState.message !== lastProcessedMessage.current) {
+        lastProcessedMessage.current = contentState.message;
+        if (contentState.success && contentState.data) {
+            if (contentState.data.optimizedContent) {
+                setValue('textoBase', contentState.data.optimizedContent, { shouldValidate: true, shouldDirty: true });
+                requestAnimationFrame(() => {
+                    autoResizeTextarea(textoBaseRef.current);
+                });
+            }
+            if (contentState.data.previews) {
+                setPreviews(contentState.data.previews);
+            }
+            toast({ title: 'Contenido Generado', description: 'El contenido y las vistas previas han sido actualizados.' });
+        } else if (!contentState.success) {
+            toast({ title: 'Error de Contenido', description: contentState.message, variant: 'destructive' });
+        }
     }
   }, [contentState, setValue, toast]);
 
@@ -542,7 +551,7 @@ export function CreatePostForm() {
 
           </CardContent>
           <CardFooter>
-            <Button type="submit" size="lg" disabled={isPublishPending}>
+            <Button type="submit" size="lg" formAction={publishFormAction} disabled={isPublishPending}>
               {isPublishPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
               Guardar y Enviar
             </Button>
@@ -552,5 +561,3 @@ export function CreatePostForm() {
     </Form>
   );
 }
-
-    
