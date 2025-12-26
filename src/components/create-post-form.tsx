@@ -63,6 +63,19 @@ export function CreatePostForm() {
 
   const lastProcessedMessage = useRef<string | null>(null);
 
+  const onGenerateDraft = () => {
+    form.handleSubmit((data) => {
+        const formData = new FormData();
+        Object.entries(data).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+                formData.append(key, value.toString());
+            }
+        });
+        draftFormAction(formData);
+    })();
+  };
+
+
   const imageUrl = useWatch({ control, name: 'imageUrl' });
   const postType = useWatch({ control, name: 'postType' });
 
@@ -159,12 +172,6 @@ export function CreatePostForm() {
         form.setValue('imageUrl', reader.result as string, { shouldValidate: true });
       };
       reader.readAsDataURL(file);
-    }
-  };
-
-  const onGenerateDraft = () => {
-    if (formRef.current) {
-        draftFormAction(new FormData(formRef.current));
     }
   };
 
@@ -297,7 +304,7 @@ export function CreatePostForm() {
             )}
           </CardContent>
           <CardFooter>
-            <Button type="button" onClick={form.handleSubmit(onGenerateDraft)} disabled={isDraftPending}>
+            <Button type="button" onClick={onGenerateDraft} disabled={isDraftPending}>
               {isDraftPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Generar Borrador
             </Button>
