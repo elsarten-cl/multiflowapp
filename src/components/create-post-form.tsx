@@ -76,7 +76,6 @@ export function CreatePostForm() {
   const allRefs = [ofertaDeValorRef, problemaSolucionRef, historiaContextoRef, conexionTerritorialRef, textoBaseRef, descripcionProductoRef];
   
   useEffect(() => {
-    // Evita bucles infinitos procesando cada mensaje una sola vez.
     if (publishState.message && publishState.message !== lastProcessedMessage.current) {
       lastProcessedMessage.current = publishState.message;
       if (publishState.success) {
@@ -292,7 +291,15 @@ export function CreatePostForm() {
             )}
           </CardContent>
           <CardFooter>
-            <Button type="submit" formAction={draftFormAction} disabled={isDraftPending}>
+            <Button
+              type="button"
+              onClick={() => {
+                if (formRef.current) {
+                  draftFormAction(new FormData(formRef.current));
+                }
+              }}
+              disabled={isDraftPending}
+            >
               {isDraftPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Generar Borrador
             </Button>
@@ -504,7 +511,16 @@ export function CreatePostForm() {
                     />
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
-                     <Button type="submit" formAction={contentFormAction} className="w-full" disabled={isContentPending}>
+                     <Button
+                      type="button"
+                      onClick={() => {
+                        if (formRef.current) {
+                          contentFormAction(new FormData(formRef.current));
+                        }
+                      }}
+                      className="w-full"
+                      disabled={isContentPending}
+                    >
                         {isContentPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                         Optimizar Texto y Generar Vistas Previas
                     </Button>
