@@ -31,6 +31,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'emprendedores.app',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

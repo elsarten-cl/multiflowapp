@@ -5,6 +5,9 @@ import { Toaster } from '@/components/ui/toaster';
 export const metadata: Metadata = {
   title: 'MultiFlowApp',
   description: 'Generate content for multiple platforms with AI.',
+  icons: {
+    icon: 'https://emprendedores.app/wp-content/uploads/2025/12/Logo-MultiFlow-App-low.png',
+  },
 };
 
 export default function RootLayout({
