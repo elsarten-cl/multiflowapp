@@ -18,7 +18,7 @@ export const CATEGORIES = [
   '🏛 Patrimonio',
   '👥 Personajes',
   '💼 Emprende',
-  '󰐟 Tacna',
+  '🇵🇪 Tacna',
 ] as const;
 
 export const ToneEnum = z.enum(TONES);
