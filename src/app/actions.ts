@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { CreatePostSchema, ToneEnum, PlatformEnum, PostTypeEnum } from '@/lib/schemas';
+import { CreatePostSchema, ToneEnum, PlatformEnum, PostTypeEnum, CategoryEnum } from '@/lib/schemas';
 import { generateContentDraft } from '@/ai/flows/generate-content-draft';
 import { generateContentWithTone } from '@/ai/flows/generate-content-with-tone';
 import { getFirebaseAdminApp } from '@/lib/firebase-admin';
@@ -110,6 +110,7 @@ export async function publishAction(prevState: FormState, formData: FormData): P
       tituloPublicacion: data.tituloPublicacion,
       textoBase: data.textoBase,
       tono: data.tono,
+      categoria: data.categoria,
       imageUrl: data.imageUrl,
       postType: data.postType,
       status: 'borrador',

@@ -10,7 +10,15 @@ export const TONES = [
   'Humoristico',
 ] as const;
 
+export const CATEGORIES = [
+  'Anuncio',
+  'Educativo',
+  'Informativo',
+  'Entretenimiento',
+] as const;
+
 export const ToneEnum = z.enum(TONES);
+export const CategoryEnum = z.enum(CATEGORIES);
 
 export const PostTypeEnum = z.enum(['articulo', 'producto']);
 
@@ -19,6 +27,7 @@ export const PlatformEnum = z.enum(['facebook', 'instagram']);
 export const CreatePostSchema = z.object({
   idea: z.string().optional(),
   tono: ToneEnum,
+  categoria: CategoryEnum,
   tituloPublicacion: z.string().min(1, { message: 'El título de la publicación es requerido.'}),
   postType: PostTypeEnum,
   ofertaDeValor: z.string().min(1, { message: 'La oferta de valor es requerida.'}),

@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Sparkles, Send, Upload, Facebook, Instagram } from 'lucide-react';
 import Image from 'next/image';
 
-import { CreatePostSchema, TONES, type CreatePostInput } from '@/lib/schemas';
+import { CreatePostSchema, TONES, CATEGORIES, type CreatePostInput } from '@/lib/schemas';
 import { generateDraftAction, generateContentAndPreviewsAction, publishAction } from '@/app/actions';
 
 import { useToast } from '@/hooks/use-toast';
@@ -85,6 +85,7 @@ export function CreatePostForm() {
     defaultValues: {
       idea: '',
       tono: 'Persuasivo',
+      categoria: 'Anuncio',
       tituloPublicacion: '',
       postType: 'articulo',
       ofertaDeValor: '',
@@ -283,51 +284,74 @@ export function CreatePostForm() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="tono"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tono de Voz</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un tono" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {TONES.map(tone => (
-                        <SelectItem key={tone} value={tone}>{tone}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="postType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo de Publicación</FormLabel>
-                   <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un tipo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="articulo">Artículo / Contenido</SelectItem>
-                      <SelectItem value="producto">Producto / Venta</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>Selecciona a qué categoría pertenece tu contenido.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <FormField
+                control={form.control}
+                name="tono"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tono de Voz</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un tono" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {TONES.map(tone => (
+                          <SelectItem key={tone} value={tone}>{tone}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="categoria"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Categoría</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona una categoría" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CATEGORIES.map(category => (
+                          <SelectItem key={category} value={category}>{category}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="postType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo de Publicación</FormLabel>
+                     <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un tipo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="articulo">Artículo / Contenido</SelectItem>
+                        <SelectItem value="producto">Producto / Venta</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
             {postType === 'producto' && (
                 <div className="space-y-6 pt-4 border-t">
                     <FormField

@@ -6,4 +6,4 @@ runConfig:
   # more instances in response to increased traffic.
   maxInstances: 1
   environmentVariables:
-    MAKE_WEBHOOK_URL: 'YOUR_MAKE_WEBHOOK_URL_HERE'
+    MAKE_WEBHOOK_URL: 'https://hook.us2.make.com/dlij3u6tu0wl4p9dqd8negd7g4zyb3c7'
