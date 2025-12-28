@@ -11,10 +11,12 @@ export const TONES = [
 ] as const;
 
 export const CATEGORIES = [
-  'Anuncio',
-  'Educativo',
-  'Informativo',
-  'Entretenimiento',
+  'Turismo',
+  'Rutas y Atractivos',
+  'Experiencias',
+  'Hospedajes',
+  'Recomendaciones',
+  'Guías Locales',
 ] as const;
 
 export const ToneEnum = z.enum(TONES);
