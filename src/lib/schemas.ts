@@ -11,12 +11,14 @@ export const TONES = [
 ] as const;
 
 export const CATEGORIES = [
-  'Turismo',
-  'Rutas y Atractivos',
-  'Experiencias',
-  'Hospedajes',
-  'Recomendaciones',
-  'Guías Locales',
+  '🏖 Turismo',
+  '🍽 Gastronomía',
+  '🎭 Cultura y Arte',
+  '🏅 Deportes',
+  '🏛 Patrimonio',
+  '👥 Personajes',
+  '💼 Emprende',
+  '󰐟 Tacna',
 ] as const;
 
 export const ToneEnum = z.enum(TONES);
