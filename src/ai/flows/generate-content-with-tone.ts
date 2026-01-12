@@ -45,7 +45,13 @@ const prompt = ai.definePrompt({
   name: 'generateContentWithTonePrompt',
   input: {schema: GenerateContentWithToneInputSchema},
   output: {schema: GenerateContentWithToneOutputSchema},
-  prompt: `You are an expert content creator. Generate content optimized for web and social media based on the following text and desired tone.\n\nText: {{{textInput}}}\nTone: {{{selectedTone}}}\n\nConsider the platform's specific requirements and best practices. The output should be a well-organized and coherent content.`, // Changed draft to textInput
+  prompt: `You are an expert content creator. Generate content optimized for web and social media based on the following text and desired tone.
+The final content must be concise, with a maximum of 280 characters.
+At the end of the content, you MUST include the following hashtags: #MultiPostFlow #IA #ContentCreation #MarketingDigital
+
+Text: {{{textInput}}}
+Tone: {{{selectedTone}}}
+`,
 });
 
 const generateContentWithToneFlow = ai.defineFlow(

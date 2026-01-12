@@ -50,14 +50,15 @@ const prompt = ai.definePrompt({
   name: 'generateContentDraftPrompt',
   input: {schema: GenerateContentDraftInputSchema},
   output: {schema: GenerateContentDraftOutputSchema},
-  prompt: `You are a content creation assistant. Your task is to generate a structured draft based on the given idea, selected tone, and post type.
+  prompt: `You are an expert content strategist and copywriter. Your task is to generate a high-quality, engaging, and structured draft based on the given idea, tone, and post type. Make the content compelling and creative.
 
 Idea: {{{idea}}}
 Tone: {{{selectedTone}}}
 Post Type: {{{postType}}}
 
-The draft should include the following sections: "Título de la publicación", "Oferta de valor", "Problema / solución", "Historia / contexto", "Conexión territorial", and "CTA sugerido". 
-If the Post Type is 'producto', make sure the content is oriented towards selling a product.
+The draft must include the following sections, filled with high-quality, creative, and persuasive content: "Título de la publicación", "Oferta de valor", "Problema / solución", "Historia / contexto", "Conexión territorial", and "CTA sugerido".
+If the Post Type is 'producto', make sure the content is oriented towards selling a product, highlighting its benefits and features.
+
 The output MUST be a string formatted exactly like this, with each field on a new line:
 Título de la publicación: [content]
 Oferta de valor: [content]
@@ -79,5 +80,3 @@ const generateContentDraftFlow = ai.defineFlow(
     return output!;
   }
 );
-
-    
